@@ -67,11 +67,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Habilitar Swagger en desarrollo y producción para facilitar las pruebas
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 
