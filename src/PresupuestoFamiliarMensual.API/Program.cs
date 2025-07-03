@@ -1,0 +1,122 @@
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PresupuestoFamiliarMensual.Application.Mapping;
+using PresupuestoFamiliarMensual.Application.Services;
+using PresupuestoFamiliarMensual.Core.Interfaces;
+using PresupuestoFamiliarMensual.Infrastructure.Data;
+using PresupuestoFamiliarMensual.Infrastructure.Repositories;
+using System.Text.Json.Serialization;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+    });
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Presupuesto Familiar Mensual API", Version = "v1" });
+});
+
+// Database
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Repositories
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Services
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+
+app.UseCors("AllowAll");
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+// Seed data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await SeedDataAsync(context);
+}
+
+app.Run();
+
+// Método para sembrar datos iniciales
+static async Task SeedDataAsync(ApplicationDbContext context)
+{
+    if (!context.Months.Any())
+    {
+        var months = new[]
+        {
+            new Core.Entities.Month { MonthNumber = 1, Year = 2024, Name = "Enero" },
+            new Core.Entities.Month { MonthNumber = 2, Year = 2024, Name = "Febrero" },
+            new Core.Entities.Month { MonthNumber = 3, Year = 2024, Name = "Marzo" },
+            new Core.Entities.Month { MonthNumber = 4, Year = 2024, Name = "Abril" },
+            new Core.Entities.Month { MonthNumber = 5, Year = 2024, Name = "Mayo" },
+            new Core.Entities.Month { MonthNumber = 6, Year = 2024, Name = "Junio" },
+            new Core.Entities.Month { MonthNumber = 7, Year = 2024, Name = "Julio" },
+            new Core.Entities.Month { MonthNumber = 8, Year = 2024, Name = "Agosto" },
+            new Core.Entities.Month { MonthNumber = 9, Year = 2024, Name = "Septiembre" },
+            new Core.Entities.Month { MonthNumber = 10, Year = 2024, Name = "Octubre" },
+            new Core.Entities.Month { MonthNumber = 11, Year = 2024, Name = "Noviembre" },
+            new Core.Entities.Month { MonthNumber = 12, Year = 2024, Name = "Diciembre" }
+        };
+        
+        context.Months.AddRange(months);
+        await context.SaveChangesAsync();
+    }
+
+    if (!context.FamilyMembers.Any())
+    {
+        var familyMembers = new[]
+        {
+            new Core.Entities.FamilyMember { Name = "Juan Pérez", Email = "juan@familia.com" },
+            new Core.Entities.FamilyMember { Name = "María Pérez", Email = "maria@familia.com" },
+            new Core.Entities.FamilyMember { Name = "Carlos Pérez", Email = "carlos@familia.com" }
+        };
+        
+        context.FamilyMembers.AddRange(familyMembers);
+        await context.SaveChangesAsync();
+    }
+} 
