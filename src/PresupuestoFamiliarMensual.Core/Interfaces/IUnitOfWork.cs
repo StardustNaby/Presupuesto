@@ -1,3 +1,5 @@
+using PresupuestoFamiliarMensual.Core.Entities;
+
 namespace PresupuestoFamiliarMensual.Core.Interfaces;
 
 /// <summary>

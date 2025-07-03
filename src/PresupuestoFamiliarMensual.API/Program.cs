@@ -89,18 +89,18 @@ static async Task SeedDataAsync(ApplicationDbContext context)
     {
         var months = new[]
         {
-            new Core.Entities.Month { MonthNumber = 1, Year = 2024, Name = "Enero" },
-            new Core.Entities.Month { MonthNumber = 2, Year = 2024, Name = "Febrero" },
-            new Core.Entities.Month { MonthNumber = 3, Year = 2024, Name = "Marzo" },
-            new Core.Entities.Month { MonthNumber = 4, Year = 2024, Name = "Abril" },
-            new Core.Entities.Month { MonthNumber = 5, Year = 2024, Name = "Mayo" },
-            new Core.Entities.Month { MonthNumber = 6, Year = 2024, Name = "Junio" },
-            new Core.Entities.Month { MonthNumber = 7, Year = 2024, Name = "Julio" },
-            new Core.Entities.Month { MonthNumber = 8, Year = 2024, Name = "Agosto" },
-            new Core.Entities.Month { MonthNumber = 9, Year = 2024, Name = "Septiembre" },
-            new Core.Entities.Month { MonthNumber = 10, Year = 2024, Name = "Octubre" },
-            new Core.Entities.Month { MonthNumber = 11, Year = 2024, Name = "Noviembre" },
-            new Core.Entities.Month { MonthNumber = 12, Year = 2024, Name = "Diciembre" }
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 1, Year = 2024, Name = "Enero" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 2, Year = 2024, Name = "Febrero" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 3, Year = 2024, Name = "Marzo" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 4, Year = 2024, Name = "Abril" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 5, Year = 2024, Name = "Mayo" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 6, Year = 2024, Name = "Junio" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 7, Year = 2024, Name = "Julio" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 8, Year = 2024, Name = "Agosto" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 9, Year = 2024, Name = "Septiembre" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 10, Year = 2024, Name = "Octubre" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 11, Year = 2024, Name = "Noviembre" },
+            new PresupuestoFamiliarMensual.Core.Entities.Month { MonthNumber = 12, Year = 2024, Name = "Diciembre" }
         };
         
         context.Months.AddRange(months);
@@ -111,9 +111,9 @@ static async Task SeedDataAsync(ApplicationDbContext context)
     {
         var familyMembers = new[]
         {
-            new Core.Entities.FamilyMember { Name = "Juan Pérez", Email = "juan@familia.com" },
-            new Core.Entities.FamilyMember { Name = "María Pérez", Email = "maria@familia.com" },
-            new Core.Entities.FamilyMember { Name = "Carlos Pérez", Email = "carlos@familia.com" }
+            new PresupuestoFamiliarMensual.Core.Entities.FamilyMember { Name = "Juan Pérez", Email = "juan@familia.com" },
+            new PresupuestoFamiliarMensual.Core.Entities.FamilyMember { Name = "María Pérez", Email = "maria@familia.com" },
+            new PresupuestoFamiliarMensual.Core.Entities.FamilyMember { Name = "Carlos Pérez", Email = "carlos@familia.com" }
         };
         
         context.FamilyMembers.AddRange(familyMembers);

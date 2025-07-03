@@ -56,7 +56,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.UpdatedAt);
             
             entity.HasOne(e => e.FamilyMember)
-                .WithMany(f => f.Budgets)
+                .WithMany()
                 .HasForeignKey(e => e.FamilyMemberId)
                 .OnDelete(DeleteBehavior.Restrict);
             
@@ -93,19 +93,19 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Amount).IsRequired().HasColumnType("decimal(18,2)");
             entity.Property(e => e.Description).IsRequired().HasMaxLength(200);
             entity.Property(e => e.BudgetCategoryId).IsRequired();
-            entity.Property(e => e.BudgetId).IsRequired();
             entity.Property(e => e.FamilyMemberId).IsRequired();
-            entity.Property(e => e.ExpenseDate).IsRequired();
+            entity.Property(e => e.MonthId).IsRequired();
+            entity.Property(e => e.Date).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             
-            entity.HasOne(e => e.Category)
+            entity.HasOne(e => e.BudgetCategory)
                 .WithMany(c => c.Expenses)
                 .HasForeignKey(e => e.BudgetCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
             
-            entity.HasOne(e => e.Budget)
-                .WithMany(b => b.Expenses)
-                .HasForeignKey(e => e.BudgetId)
+            entity.HasOne(e => e.Month)
+                .WithMany(m => m.Expenses)
+                .HasForeignKey(e => e.MonthId)
                 .OnDelete(DeleteBehavior.Restrict);
             
             entity.HasOne(e => e.FamilyMember)

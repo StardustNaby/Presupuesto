@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PresupuestoFamiliarMensual.Core.Interfaces;
+using PresupuestoFamiliarMensual.Infrastructure.Data;
 
 namespace PresupuestoFamiliarMensual.Infrastructure.Repositories;
 

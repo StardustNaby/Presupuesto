@@ -12,9 +12,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PresupuestoFamiliarMensual.Core\PresupuestoFamiliarMensual.Core.csproj" />
     <ProjectReference Include="..\PresupuestoFamiliarMensual.Application\PresupuestoFamiliarMensual.Application.csproj" />
     <ProjectReference Include="..\PresupuestoFamiliarMensual.Infrastructure\PresupuestoFamiliarMensual.Infrastructure.csproj" />
   </ItemGroup>

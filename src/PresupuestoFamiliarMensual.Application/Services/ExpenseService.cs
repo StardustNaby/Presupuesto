@@ -70,9 +70,9 @@ public class ExpenseService : IExpenseService
             Amount = createExpenseDto.Amount,
             Description = createExpenseDto.Description.Trim(),
             BudgetCategoryId = createExpenseDto.BudgetCategoryId,
-            BudgetId = budgetId,
             FamilyMemberId = createExpenseDto.FamilyMemberId,
-            ExpenseDate = createExpenseDto.ExpenseDate ?? DateTime.UtcNow,
+            MonthId = budget.MonthId,
+            Date = createExpenseDto.ExpenseDate ?? DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow
         };
 

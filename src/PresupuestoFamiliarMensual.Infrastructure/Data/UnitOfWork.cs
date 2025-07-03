@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using PresupuestoFamiliarMensual.Core.Entities;
 using PresupuestoFamiliarMensual.Core.Interfaces;
+using PresupuestoFamiliarMensual.Infrastructure.Repositories;
 
 namespace PresupuestoFamiliarMensual.Infrastructure.Data;
 

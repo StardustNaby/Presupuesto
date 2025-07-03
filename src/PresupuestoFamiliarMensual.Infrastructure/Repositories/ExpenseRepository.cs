@@ -17,8 +17,8 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
     public async Task<Expense?> GetByIdWithDetailsAsync(int id)
     {
         return await _context.Expenses
-            .Include(e => e.Category)
-            .Include(e => e.Budget)
+            .Include(e => e.BudgetCategory)
+            .Include(e => e.Month)
             .Include(e => e.FamilyMember)
             .FirstOrDefaultAsync(e => e.Id == id);
     }
@@ -26,10 +26,10 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
     public async Task<IEnumerable<Expense>> GetByBudgetIdAsync(int budgetId)
     {
         return await _context.Expenses
-            .Include(e => e.Category)
+            .Include(e => e.BudgetCategory)
             .Include(e => e.FamilyMember)
-            .Where(e => e.BudgetId == budgetId)
-            .OrderByDescending(e => e.ExpenseDate)
+            .Where(e => e.MonthId == budgetId) // Cambiado de BudgetId a MonthId
+            .OrderByDescending(e => e.Date)
             .ToListAsync();
     }
 
@@ -38,7 +38,7 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
         return await _context.Expenses
             .Include(e => e.FamilyMember)
             .Where(e => e.BudgetCategoryId == categoryId)
-            .OrderByDescending(e => e.ExpenseDate)
+            .OrderByDescending(e => e.Date)
             .ToListAsync();
     }
 
@@ -52,7 +52,7 @@ public class ExpenseRepository : Repository<Expense>, IExpenseRepository
     public async Task<decimal> GetTotalSpentByBudgetAsync(int budgetId)
     {
         return await _context.Expenses
-            .Where(e => e.BudgetId == budgetId)
+            .Where(e => e.MonthId == budgetId) // Cambiado de BudgetId a MonthId
             .SumAsync(e => e.Amount);
     }
 } 

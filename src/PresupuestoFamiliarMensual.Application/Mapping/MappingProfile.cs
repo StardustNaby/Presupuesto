@@ -31,7 +31,7 @@ public class MappingProfile : Profile
 
         // Mapeo de Expense
         CreateMap<Expense, ExpenseDto>()
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.BudgetCategory.Name))
             .ForMember(dest => dest.FamilyMemberName, opt => opt.MapFrom(src => src.FamilyMember.Name));
     }
 } 

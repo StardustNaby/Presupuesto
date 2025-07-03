@@ -21,7 +21,7 @@ public class BudgetRepository : Repository<Budget>, IBudgetRepository
             .Include(b => b.Month)
             .Include(b => b.Categories)
             .Include(b => b.Expenses)
-                .ThenInclude(e => e.Category)
+                .ThenInclude(e => e.BudgetCategory)
             .Include(b => b.Expenses)
                 .ThenInclude(e => e.FamilyMember)
             .FirstOrDefaultAsync(b => b.Id == id);
@@ -55,7 +55,10 @@ public class BudgetRepository : Repository<Budget>, IBudgetRepository
             .Include(b => b.Month)
             .Include(b => b.Categories)
             .Include(b => b.Expenses)
-                .ThenInclude(e => e.Category)
+                .ThenInclude(e => e.BudgetCategory)
             .Include(b => b.Expenses)
                 .ThenInclude(e => e.FamilyMember)
+            .ToListAsync();
+    }
+}
  
