@@ -9,7 +9,7 @@ namespace PresupuestoFamiliarMensual.API.Controllers;
 /// Controlador para gestionar categorías de presupuesto
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/categories")]
 public class BudgetCategoriesController : ControllerBase
 {
     private readonly IBudgetCategoryService _categoryService;
