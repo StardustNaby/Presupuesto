@@ -16,12 +16,24 @@ public class HealthController : ControllerBase
     [HttpGet]
     public ActionResult Get()
     {
+        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+        var hasConnectionString = !string.IsNullOrEmpty(connectionString);
+        
         return Ok(new { 
             status = "healthy", 
             timestamp = DateTime.UtcNow,
             service = "Presupuesto Familiar Mensual API",
             version = "1.0.0",
-            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"
+            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development",
+            database = new {
+                hasConnectionString = hasConnectionString,
+                connectionStringLength = connectionString?.Length ?? 0,
+                dbHost = Environment.GetEnvironmentVariable("DB_HOST"),
+                dbPort = Environment.GetEnvironmentVariable("DB_PORT"),
+                dbName = Environment.GetEnvironmentVariable("DB_NAME"),
+                dbUser = Environment.GetEnvironmentVariable("DB_USER"),
+                hasDbPassword = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DB_PASSWORD"))
+            }
         });
     }
 
