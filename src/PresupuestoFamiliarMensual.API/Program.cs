@@ -14,6 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
+// Configurar variables de entorno para Railway
+builder.Configuration.AddEnvironmentVariables();
+
 // Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -78,11 +81,22 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed data
-using (var scope = app.Services.CreateScope())
+// Seed data (solo en desarrollo o si la base de datos está disponible)
+if (app.Environment.IsDevelopment())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await SeedDataAsync(context);
+    using (var scope = app.Services.CreateScope())
+    {
+        try
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await SeedDataAsync(context);
+        }
+        catch (Exception ex)
+        {
+            // Log el error pero no fallar la aplicación
+            Console.WriteLine($"Error seeding data: {ex.Message}");
+        }
+    }
 }
 
 app.Run();

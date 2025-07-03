@@ -61,11 +61,23 @@ public class ReferenceDataController : ControllerBase
     [HttpGet("health")]
     public ActionResult GetHealth()
     {
-        return Ok(new { 
-            status = "healthy", 
-            timestamp = DateTime.UtcNow,
-            service = "Presupuesto Familiar Mensual API",
-            version = "1.0.0"
-        });
+        try
+        {
+            return Ok(new { 
+                status = "healthy", 
+                timestamp = DateTime.UtcNow,
+                service = "Presupuesto Familiar Mensual API",
+                version = "1.0.0",
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { 
+                status = "unhealthy", 
+                timestamp = DateTime.UtcNow,
+                error = ex.Message
+            });
+        }
     }
 } 
