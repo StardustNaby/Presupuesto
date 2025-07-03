@@ -7,9 +7,10 @@ namespace PresupuestoFamiliarMensual.Application.Services;
 /// </summary>
 public interface IBudgetCategoryService
 {
+    Task<IEnumerable<BudgetCategoryDto>> GetAllAsync();
     Task<IEnumerable<BudgetCategoryDto>> GetByBudgetIdAsync(int budgetId);
     Task<BudgetCategoryDto?> GetByIdAsync(int id);
-    Task<BudgetCategoryDto> CreateAsync(int budgetId, CreateBudgetCategoryDto createCategoryDto);
+    Task<BudgetCategoryDto> CreateAsync(CreateBudgetCategoryDto createCategoryDto);
     Task<BudgetCategoryDto> UpdateAsync(int id, UpdateBudgetCategoryDto updateCategoryDto);
     Task DeleteAsync(int id);
 } 

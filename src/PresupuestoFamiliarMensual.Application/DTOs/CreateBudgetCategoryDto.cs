@@ -14,4 +14,7 @@ public class CreateBudgetCategoryDto
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "El límite debe ser mayor a 0")]
     public decimal Limit { get; set; }
+    
+    [Required]
+    public int BudgetId { get; set; }
 } 

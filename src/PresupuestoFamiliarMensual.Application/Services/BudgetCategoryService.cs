@@ -20,6 +20,12 @@ public class BudgetCategoryService : IBudgetCategoryService
         _mapper = mapper;
     }
 
+    public async Task<IEnumerable<BudgetCategoryDto>> GetAllAsync()
+    {
+        var categories = await _unitOfWork.BudgetCategories.GetAllAsync();
+        return _mapper.Map<IEnumerable<BudgetCategoryDto>>(categories);
+    }
+
     public async Task<IEnumerable<BudgetCategoryDto>> GetByBudgetIdAsync(int budgetId)
     {
         var categories = await _unitOfWork.BudgetCategories.GetByBudgetIdAsync(budgetId);
@@ -32,24 +38,24 @@ public class BudgetCategoryService : IBudgetCategoryService
         return _mapper.Map<BudgetCategoryDto>(category);
     }
 
-    public async Task<BudgetCategoryDto> CreateAsync(int budgetId, CreateBudgetCategoryDto createCategoryDto)
+    public async Task<BudgetCategoryDto> CreateAsync(CreateBudgetCategoryDto createCategoryDto)
     {
         // Verificar que el presupuesto existe
-        var budget = await _unitOfWork.Budgets.GetByIdAsync(budgetId);
+        var budget = await _unitOfWork.Budgets.GetByIdAsync(createCategoryDto.BudgetId);
         if (budget == null)
-            throw new ArgumentException($"No se encontró el presupuesto con ID {budgetId}");
+            throw new ArgumentException($"No se encontró el presupuesto con ID {createCategoryDto.BudgetId}");
 
         // REGLA DE NEGOCIO: No permitir categorías con nombre repetido
         var normalizedName = createCategoryDto.Name.Trim();
-        var existsByName = await _unitOfWork.BudgetCategories.ExistsByNameInBudgetAsync(normalizedName, budgetId);
+        var existsByName = await _unitOfWork.BudgetCategories.ExistsByNameInBudgetAsync(normalizedName, createCategoryDto.BudgetId);
         if (existsByName)
-            throw new DuplicateCategoryNameException(normalizedName, budgetId);
+            throw new DuplicateCategoryNameException(normalizedName, createCategoryDto.BudgetId);
 
         var category = new BudgetCategory
         {
             Name = normalizedName,
             Limit = createCategoryDto.Limit,
-            BudgetId = budgetId,
+            BudgetId = createCategoryDto.BudgetId,
             CreatedAt = DateTime.UtcNow
         };
 
