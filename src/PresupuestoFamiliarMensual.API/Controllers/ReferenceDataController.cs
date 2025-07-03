@@ -53,4 +53,19 @@ public class ReferenceDataController : ControllerBase
             return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Health check endpoint para Railway
+    /// </summary>
+    /// <returns>Estado de la aplicación</returns>
+    [HttpGet("health")]
+    public ActionResult GetHealth()
+    {
+        return Ok(new { 
+            status = "healthy", 
+            timestamp = DateTime.UtcNow,
+            service = "Presupuesto Familiar Mensual API",
+            version = "1.0.0"
+        });
+    }
 } 
