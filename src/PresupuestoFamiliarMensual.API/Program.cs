@@ -32,9 +32,18 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new() { Title = "Presupuesto Familiar Mensual API", Version = "v1" });
 });
 
-// Database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Database - Configuración condicional para Railway
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseNpgsql(connectionString));
+}
+else
+{
+    // Modo de prueba sin base de datos
+    Console.WriteLine("⚠️ No se encontró cadena de conexión. Ejecutando en modo de prueba.");
+}
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
