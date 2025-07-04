@@ -138,10 +138,10 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
         // Crear miembros de familia
         var familyMembers = new[]
         {
-            new FamilyMember { Name = "Juan Pérez", Age = 35, Role = "Padre" },
-            new FamilyMember { Name = "María Pérez", Age = 32, Role = "Madre" },
-            new FamilyMember { Name = "Carlos Pérez", Age = 12, Role = "Hijo" },
-            new FamilyMember { Name = "Ana Pérez", Age = 8, Role = "Hija" }
+            new FamilyMember { Name = "Juan Pérez", Email = "juan@example.com" },
+            new FamilyMember { Name = "María Pérez", Email = "maria@example.com" },
+            new FamilyMember { Name = "Carlos Pérez", Email = "carlos@example.com" },
+            new FamilyMember { Name = "Ana Pérez", Email = "ana@example.com" }
         };
 
         context.FamilyMembers.AddRange(familyMembers);
@@ -150,18 +150,18 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
         // Crear meses
         var months = new[]
         {
-            new Month { Name = "Enero", Number = 1 },
-            new Month { Name = "Febrero", Number = 2 },
-            new Month { Name = "Marzo", Number = 3 },
-            new Month { Name = "Abril", Number = 4 },
-            new Month { Name = "Mayo", Number = 5 },
-            new Month { Name = "Junio", Number = 6 },
-            new Month { Name = "Julio", Number = 7 },
-            new Month { Name = "Agosto", Number = 8 },
-            new Month { Name = "Septiembre", Number = 9 },
-            new Month { Name = "Octubre", Number = 10 },
-            new Month { Name = "Noviembre", Number = 11 },
-            new Month { Name = "Diciembre", Number = 12 }
+            new Month { Year = 2024, MonthNumber = 1, Name = "Enero" },
+            new Month { Year = 2024, MonthNumber = 2, Name = "Febrero" },
+            new Month { Year = 2024, MonthNumber = 3, Name = "Marzo" },
+            new Month { Year = 2024, MonthNumber = 4, Name = "Abril" },
+            new Month { Year = 2024, MonthNumber = 5, Name = "Mayo" },
+            new Month { Year = 2024, MonthNumber = 6, Name = "Junio" },
+            new Month { Year = 2024, MonthNumber = 7, Name = "Julio" },
+            new Month { Year = 2024, MonthNumber = 8, Name = "Agosto" },
+            new Month { Year = 2024, MonthNumber = 9, Name = "Septiembre" },
+            new Month { Year = 2024, MonthNumber = 10, Name = "Octubre" },
+            new Month { Year = 2024, MonthNumber = 11, Name = "Noviembre" },
+            new Month { Year = 2024, MonthNumber = 12, Name = "Diciembre" }
         };
 
         context.Months.AddRange(months);
@@ -170,9 +170,9 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
         // Crear presupuestos
         var budgets = new[]
         {
-            new Budget { FamilyMemberId = 1, MonthId = 7, Year = 2025, TotalAmount = 5000 },
-            new Budget { FamilyMemberId = 2, MonthId = 7, Year = 2025, TotalAmount = 3000 },
-            new Budget { FamilyMemberId = 1, MonthId = 8, Year = 2025, TotalAmount = 5500 }
+            new Budget { FamilyMemberId = 1, MonthId = 7, TotalAmount = 5000 },
+            new Budget { FamilyMemberId = 2, MonthId = 7, TotalAmount = 3000 },
+            new Budget { FamilyMemberId = 1, MonthId = 8, TotalAmount = 5500 }
         };
 
         context.Budgets.AddRange(budgets);
@@ -195,11 +195,11 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
         // Crear gastos
         var expenses = new[]
         {
-            new Expense { Description = "Compras del supermercado", Amount = 250, CategoryId = 1, BudgetId = 1 },
-            new Expense { Description = "Gasolina", Amount = 150, CategoryId = 2, BudgetId = 1 },
-            new Expense { Description = "Cine", Amount = 80, CategoryId = 3, BudgetId = 1 },
-            new Expense { Description = "Luz", Amount = 200, CategoryId = 4, BudgetId = 1 },
-            new Expense { Description = "Comida rápida", Amount = 120, CategoryId = 5, BudgetId = 2 }
+            new Expense { Description = "Compras del supermercado", Amount = 250, BudgetCategoryId = 1, FamilyMemberId = 1, MonthId = 7 },
+            new Expense { Description = "Gasolina", Amount = 150, BudgetCategoryId = 2, FamilyMemberId = 1, MonthId = 7 },
+            new Expense { Description = "Cine", Amount = 80, BudgetCategoryId = 3, FamilyMemberId = 1, MonthId = 7 },
+            new Expense { Description = "Luz", Amount = 200, BudgetCategoryId = 4, FamilyMemberId = 1, MonthId = 7 },
+            new Expense { Description = "Comida rápida", Amount = 120, BudgetCategoryId = 5, FamilyMemberId = 2, MonthId = 7 }
         };
 
         context.Expenses.AddRange(expenses);
