@@ -203,33 +203,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Health Checks
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<ApplicationDbContext>("database", tags: new[] { "db" });
+// Health Checks básicos
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Ejecutar migraciones automáticamente al iniciar (en background)
-if (!string.IsNullOrEmpty(connectionString))
-{
-    _ = Task.Run(async () =>
-    {
-        try
-        {
-            // Esperar un poco para que la aplicación esté completamente iniciada
-            await Task.Delay(5000);
-            Console.WriteLine("🔄 Ejecutando migraciones automáticamente...");
-            using var scope = app.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            await context.Database.MigrateAsync();
-            Console.WriteLine("✅ Migraciones ejecutadas correctamente");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"⚠️ Error al ejecutar migraciones: {ex.Message}");
-        }
-    });
-}
+// Las migraciones se ejecutarán manualmente cuando sea necesario
+Console.WriteLine("🚀 Aplicación iniciada - migraciones disponibles para ejecución manual");
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -255,26 +235,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-// Health check endpoint
-app.MapHealthChecks("/health", new()
-{
-    ResponseWriter = async (context, report) =>
-    {
-        context.Response.ContentType = "application/json";
-        var result = new
-        {
-            status = report.Status.ToString(),
-            timestamp = DateTime.UtcNow,
-            checks = report.Entries.Select(e => new
-            {
-                name = e.Key,
-                status = e.Value.Status.ToString(),
-                description = e.Value.Description
-            })
-        };
-        await context.Response.WriteAsJsonAsync(result);
-    }
-});
+// Health check endpoint simple
+app.MapHealthChecks("/health");
 
 // Middleware de manejo de excepciones global simplificado
 app.Use(async (context, next) =>
