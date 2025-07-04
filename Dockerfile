@@ -3,7 +3,6 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV DOTNET_EnableDiagnostics=0
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
 # Usar la imagen de SDK para compilar
@@ -22,7 +21,7 @@ RUN dotnet restore "src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensua
 # Copiar todo el código fuente
 COPY . .
 
-# Compilar y publicar en un solo paso
+# Compilar y publicar
 WORKDIR "/src/src/PresupuestoFamiliarMensual.API"
 RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish
 
@@ -31,8 +30,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Crear usuario no-root (solo si es necesario)
-RUN groupadd -r appuser && useradd -r -g appuser appuser && chown -R appuser /app
-USER appuser
-
-ENTRYPOINT ["dotnet", "PresupuestoFamiliarMensual.API.dll"] 
+# Ejecutar como root para evitar problemas de permisos
+CMD ["dotnet", "PresupuestoFamiliarMensual.API.dll"] 
