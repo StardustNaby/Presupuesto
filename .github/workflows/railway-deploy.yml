@@ -1,0 +1,30 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Build and test
+      run: |
+        dotnet restore
+        dotnet build --no-restore --configuration Release
+        dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish
+        
+    - name: Deploy to Railway
+      uses: railway/deploy@v1
+      with:
+        service: ${{ secrets.RAILWAY_SERVICE }}
+        token: ${{ secrets.RAILWAY_TOKEN }} 
