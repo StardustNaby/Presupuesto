@@ -21,6 +21,9 @@ RUN dotnet restore "src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensua
 # Copiar todo el código fuente
 COPY . .
 
+# Dar permisos de ejecución al script de migración
+RUN chmod +x scripts/migrate.sh
+
 # Compilar y publicar en un solo paso
 WORKDIR "/src/src/PresupuestoFamiliarMensual.API"
 RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish
@@ -29,6 +32,10 @@ RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/pu
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+COPY --from=build /src/scripts ./scripts
+
+# Instalar curl para el script de migración
+RUN apk add --no-cache curl bash
 
 # Crear usuario no-root
 RUN adduser -D -s /bin/sh appuser && chown -R appuser /app
