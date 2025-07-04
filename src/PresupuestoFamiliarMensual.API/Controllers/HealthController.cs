@@ -58,4 +58,25 @@ public class HealthController : ControllerBase
     {
         return Ok("pong");
     }
+
+    /// <summary>
+    /// Endpoint de diagnóstico para verificar el estado de la aplicación
+    /// </summary>
+    /// <returns>Información de diagnóstico</returns>
+    [HttpGet("diagnostic")]
+    public ActionResult GetDiagnostic()
+    {
+        var diagnostic = new
+        {
+            timestamp = DateTime.UtcNow,
+            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
+            databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "Configured" : "Not configured",
+            port = Environment.GetEnvironmentVariable("PORT") ?? "8080",
+            machineName = Environment.MachineName,
+            osVersion = Environment.OSVersion.ToString(),
+            dotnetVersion = Environment.Version.ToString()
+        };
+
+        return Ok(diagnostic);
+    }
 } 

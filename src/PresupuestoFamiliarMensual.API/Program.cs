@@ -80,13 +80,32 @@ if (!string.IsNullOrEmpty(dbUrl))
         Console.WriteLine("🔄 Ejecutando migraciones...");
         using var scope = app.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
-        Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+        
+        // Verificar conexión
+        Console.WriteLine("🔍 Verificando conexión a la base de datos...");
+        var canConnect = await context.Database.CanConnectAsync();
+        Console.WriteLine($"📊 ¿Puede conectar a la BD? {canConnect}");
+        
+        if (canConnect)
+        {
+            Console.WriteLine("🔄 Aplicando migraciones...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+        }
+        else
+        {
+            Console.WriteLine("❌ No se puede conectar a la base de datos");
+        }
     }
     catch (Exception ex)
     {
         Console.WriteLine($"⚠️ Error en migraciones: {ex.Message}");
+        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
     }
+}
+else
+{
+    Console.WriteLine("⚠️ No hay DATABASE_URL configurado");
 }
 
 // Pipeline mínimo
