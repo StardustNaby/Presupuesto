@@ -5,7 +5,15 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    reviewers:
-      - "vanes"
     assignees:
-      - "vanes" 
+      - "StardustNaby"
+    ignore:
+      # Ignorar Entity Framework 9.x porque requiere .NET 9.0
+      - dependency-name: "Microsoft.EntityFrameworkCore"
+        versions: ["9.x"]
+      - dependency-name: "Microsoft.EntityFrameworkCore.Design"
+        versions: ["9.x"]
+      - dependency-name: "Microsoft.EntityFrameworkCore.Tools"
+        versions: ["9.x"]
+      - dependency-name: "Npgsql.EntityFrameworkCore.PostgreSQL"
+        versions: ["9.x"] 
