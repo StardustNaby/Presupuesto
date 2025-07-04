@@ -155,6 +155,23 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Ejecutar migraciones automáticamente al iniciar
+if (!string.IsNullOrEmpty(connectionString))
+{
+    try
+    {
+        Console.WriteLine("🔄 Ejecutando migraciones automáticamente...");
+        using var scope = app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        context.Database.Migrate();
+        Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Error al ejecutar migraciones: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 app.UseSwagger();
 app.UseSwaggerUI(c =>
