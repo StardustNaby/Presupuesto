@@ -22,24 +22,8 @@ jobs:
         dotnet restore
         dotnet build --configuration Release
         
-    - name: Check Railway secrets
-      id: check-secrets
+    - name: Success
       run: |
-        if [ -n "${{ secrets.RAILWAY_TOKEN }}" ] && [ -n "${{ secrets.RAILWAY_SERVICE }}" ]; then
-          echo "secrets_configured=true" >> $GITHUB_OUTPUT
-        else
-          echo "secrets_configured=false" >> $GITHUB_OUTPUT
-        fi
-        
-    - name: Deploy to Railway
-      if: steps.check-secrets.outputs.secrets_configured == 'true'
-      uses: railway/deploy@v1
-      with:
-        service: ${{ secrets.RAILWAY_SERVICE }}
-        token: ${{ secrets.RAILWAY_TOKEN }}
-        
-    - name: Skip deployment
-      if: steps.check-secrets.outputs.secrets_configured == 'false'
-      run: |
-        echo "⚠️ Railway secrets no configurados. Saltando despliegue."
-        echo "✅ Build completado exitosamente" 
+        echo "✅ Build completado exitosamente"
+        echo "🚀 Listo para desplegar manualmente en Railway"
+        echo "📋 Para desplegar automáticamente, configura Railway CLI" 
