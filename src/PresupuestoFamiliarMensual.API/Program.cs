@@ -14,53 +14,25 @@ Console.WriteLine($"🚀 Puerto: {port}");
 
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// Configuración de base de datos
-var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-if (!string.IsNullOrEmpty(dbUrl))
-{
-    Console.WriteLine("🔗 Configurando base de datos...");
-    
-    // Convertir formato URL a formato de conexión
-    if (dbUrl.StartsWith("postgres://") || dbUrl.StartsWith("postgresql://"))
-    {
-        var url = dbUrl.Replace("postgresql://", "postgres://");
-        var uri = new Uri(url);
-        var userInfo = uri.UserInfo.Split(':');
-        var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-        
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString));
-        
-        Console.WriteLine("✅ Base de datos PostgreSQL configurada");
-    }
-    else
-    {
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(dbUrl));
-        Console.WriteLine("✅ Base de datos configurada con cadena directa");
-    }
-}
-else
-{
-    Console.WriteLine("⚠️ DATABASE_URL no encontrado - modo sin base de datos");
-}
+// Configuración de base de datos (temporalmente deshabilitada)
+Console.WriteLine("⚠️ Base de datos temporalmente deshabilitada para diagnóstico");
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// Repositories
-builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
-builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
-builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+// Repositories (temporalmente comentados)
+// builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+// builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
+// builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+// builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
-// Unit of Work
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// Unit of Work (temporalmente comentado)
+// builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Services
-builder.Services.AddScoped<IBudgetService, BudgetService>();
-builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
-builder.Services.AddScoped<IExpenseService, ExpenseService>();
+// Services (temporalmente comentados)
+// builder.Services.AddScoped<IBudgetService, BudgetService>();
+// builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
+// builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 // Servicios mínimos
 builder.Services.AddControllers();
@@ -72,41 +44,8 @@ var app = builder.Build();
 
 Console.WriteLine("🚀 Aplicación iniciada");
 
-// Ejecutar migraciones si hay base de datos
-if (!string.IsNullOrEmpty(dbUrl))
-{
-    try
-    {
-        Console.WriteLine("🔄 Ejecutando migraciones...");
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        
-        // Verificar conexión
-        Console.WriteLine("🔍 Verificando conexión a la base de datos...");
-        var canConnect = await context.Database.CanConnectAsync();
-        Console.WriteLine($"📊 ¿Puede conectar a la BD? {canConnect}");
-        
-        if (canConnect)
-        {
-            Console.WriteLine("🔄 Aplicando migraciones...");
-            await context.Database.MigrateAsync();
-            Console.WriteLine("✅ Migraciones ejecutadas correctamente");
-        }
-        else
-        {
-            Console.WriteLine("❌ No se puede conectar a la base de datos");
-        }
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"⚠️ Error en migraciones: {ex.Message}");
-        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
-    }
-}
-else
-{
-    Console.WriteLine("⚠️ No hay DATABASE_URL configurado");
-}
+// Migraciones temporalmente deshabilitadas
+Console.WriteLine("⚠️ Migraciones temporalmente deshabilitadas para diagnóstico");
 
 // Pipeline mínimo
 app.UseSwagger();
