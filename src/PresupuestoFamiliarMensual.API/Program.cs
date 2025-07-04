@@ -203,23 +203,32 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>("database", tags: new[] { "db" });
+
 var app = builder.Build();
 
-// Ejecutar migraciones automáticamente al iniciar
+// Ejecutar migraciones automáticamente al iniciar (en background)
 if (!string.IsNullOrEmpty(connectionString))
 {
-    try
+    _ = Task.Run(async () =>
     {
-        Console.WriteLine("🔄 Ejecutando migraciones automáticamente...");
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        context.Database.Migrate();
-        Console.WriteLine("✅ Migraciones ejecutadas correctamente");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"⚠️ Error al ejecutar migraciones: {ex.Message}");
-    }
+        try
+        {
+            // Esperar un poco para que la aplicación esté completamente iniciada
+            await Task.Delay(5000);
+            Console.WriteLine("🔄 Ejecutando migraciones automáticamente...");
+            using var scope = app.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"⚠️ Error al ejecutar migraciones: {ex.Message}");
+        }
+    });
 }
 
 // Configure the HTTP request pipeline.
@@ -245,6 +254,27 @@ if (app.Environment.IsProduction())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Health check endpoint
+app.MapHealthChecks("/health", new()
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = new
+        {
+            status = report.Status.ToString(),
+            timestamp = DateTime.UtcNow,
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description
+            })
+        };
+        await context.Response.WriteAsJsonAsync(result);
+    }
+});
 
 // Middleware de manejo de excepciones global simplificado
 app.Use(async (context, next) =>
