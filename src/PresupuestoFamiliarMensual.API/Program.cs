@@ -1,60 +1,26 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración específica para Railway
-var port = Environment.GetEnvironmentVariable("PORT");
-Console.WriteLine($"🚀 Puerto detectado: {port ?? "null"}");
+// Configuración básica para Railway
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+Console.WriteLine($"🚀 Puerto: {port}");
 
-// Configurar el puerto para Railway
-if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
-{
-    Console.WriteLine($"✅ Usando puerto: {portNumber}");
-    builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
-}
-else
-{
-    Console.WriteLine($"⚠️ Usando puerto por defecto: 8080");
-    builder.WebHost.UseUrls("http://0.0.0.0:8080");
-}
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// Add services to the container.
-builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-    });
-
+// Servicios mínimos
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-// Swagger básico
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new() { Title = "Presupuesto Familiar Mensual API", Version = "v1" });
-});
-
-// Health Checks básicos
+builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-Console.WriteLine("🚀 Aplicación iniciada - versión minimalista");
+Console.WriteLine("🚀 Aplicación iniciada");
 
-// Configure the HTTP request pipeline.
+// Pipeline mínimo
 app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
-    c.RoutePrefix = "swagger";
-});
-
+app.UseSwaggerUI();
 app.MapControllers();
-
-// Health check endpoint simple
 app.MapHealthChecks("/health");
 
-Console.WriteLine("✅ Aplicación iniciada correctamente");
+Console.WriteLine("✅ Aplicación lista");
 app.Run(); 
