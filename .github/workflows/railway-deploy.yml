@@ -17,11 +17,10 @@ jobs:
       with:
         dotnet-version: '8.0.x'
         
-    - name: Build and test
+    - name: Build
       run: |
-        dotnet restore --verbosity normal
-        dotnet build --no-restore --configuration Release --verbosity normal
-        dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish --no-build
+        dotnet restore
+        dotnet build --configuration Release
         
     - name: Check Railway secrets
       id: check-secrets
@@ -43,6 +42,4 @@ jobs:
       if: steps.check-secrets.outputs.secrets_configured == 'false'
       run: |
         echo "⚠️ Railway secrets no configurados. Saltando despliegue."
-        echo "Para configurar el despliegue automático:"
-        echo "1. Ve a Settings > Secrets and variables > Actions"
-        echo "2. Agrega RAILWAY_TOKEN y RAILWAY_SERVICE" 
+        echo "✅ Build completado exitosamente" 

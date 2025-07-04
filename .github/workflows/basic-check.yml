@@ -1,0 +1,43 @@
+name: Basic Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Verify files exist
+      run: |
+        echo "🔍 Verificando archivos del proyecto..."
+        
+        # Verificar archivos esenciales
+        files=(
+          "PresupuestoFamiliarMensual.sln"
+          "Dockerfile"
+          "railway.json"
+          "src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj"
+        )
+        
+        for file in "${files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✅ $file encontrado"
+          else
+            echo "❌ $file no encontrado"
+            exit 1
+          fi
+        done
+        
+        echo "🎉 Todos los archivos esenciales están presentes"
+        
+    - name: Success
+      run: |
+        echo "✅ Verificación básica completada exitosamente"
+        echo "📦 Proyecto listo para desarrollo" 
