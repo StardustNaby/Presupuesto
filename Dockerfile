@@ -23,7 +23,7 @@ COPY . .
 
 # Compilar y publicar en un solo paso
 WORKDIR "/src/src/PresupuestoFamiliarMensual.API"
-RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish --no-restore --no-build
+RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish
 
 # Imagen final
 FROM base AS final
