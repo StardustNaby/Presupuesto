@@ -50,8 +50,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
 {
-    connectionString = dbUrl;
-    Console.WriteLine($"🔗 Usando cadena de conexión de DATABASE_URL");
+    // Si la cadena es formato URL, la convertimos a formato largo
+    if (dbUrl.StartsWith("postgres://"))
+    {
+        var uri = new Uri(dbUrl);
+        var userInfo = uri.UserInfo.Split(':');
+        var builderStr = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+        connectionString = builderStr;
+        Console.WriteLine($"🔗 DATABASE_URL detectado en formato URL, convertido a formato largo para Npgsql");
+    }
+    else
+    {
+        connectionString = dbUrl;
+        Console.WriteLine($"🔗 Usando cadena de conexión de DATABASE_URL");
+    }
 }
 else
 {
