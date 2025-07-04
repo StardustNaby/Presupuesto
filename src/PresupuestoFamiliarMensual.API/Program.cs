@@ -59,6 +59,7 @@ else
 }
 if (!string.IsNullOrEmpty(connectionString))
 {
+    Console.WriteLine($"Cadena de conexión final: {connectionString}");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
         options.UseNpgsql(connectionString, 
             npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(
