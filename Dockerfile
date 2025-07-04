@@ -4,6 +4,7 @@ WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV DOTNET_EnableDiagnostics=0
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
 # Usar la imagen de SDK para compilar
 FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
