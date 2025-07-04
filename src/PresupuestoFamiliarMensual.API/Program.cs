@@ -31,6 +31,12 @@ else
     builder.WebHost.UseUrls("http://0.0.0.0:8080");
 }
 
+// Configuración adicional para Railway
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(portNumber > 0 ? portNumber : 8080);
+});
+
 // Configurar variables de entorno para Railway
 builder.Configuration.AddEnvironmentVariables();
 
