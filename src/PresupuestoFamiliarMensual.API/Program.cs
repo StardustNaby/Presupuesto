@@ -19,7 +19,7 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
 {
-    Console.WriteLine("🔗 Configurando base de datos...");
+    Console.WriteLine("🔗 Configurando base de datos PostgreSQL...");
     
     // Convertir formato URL a formato de conexión
     if (dbUrl.StartsWith("postgres://") || dbUrl.StartsWith("postgresql://"))
@@ -43,7 +43,11 @@ if (!string.IsNullOrEmpty(dbUrl))
 }
 else
 {
-    Console.WriteLine("⚠️ DATABASE_URL no encontrado - modo sin base de datos");
+    Console.WriteLine("🔗 Configurando base de datos SQLite local...");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString));
+    Console.WriteLine("✅ Base de datos SQLite configurada");
 }
 
 // AutoMapper
