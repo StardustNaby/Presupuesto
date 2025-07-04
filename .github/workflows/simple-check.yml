@@ -1,0 +1,53 @@
+name: Simple Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Verify project structure
+      run: |
+        echo "🔍 Verificando estructura del proyecto..."
+        
+        # Verificar archivos esenciales
+        if [ ! -f "PresupuestoFamiliarMensual.sln" ]; then
+          echo "❌ No se encontró PresupuestoFamiliarMensual.sln"
+          exit 1
+        fi
+        
+        if [ ! -f "Dockerfile" ]; then
+          echo "❌ No se encontró Dockerfile"
+          exit 1
+        fi
+        
+        if [ ! -f "railway.json" ]; then
+          echo "❌ No se encontró railway.json"
+          exit 1
+        fi
+        
+        # Verificar proyecto API
+        if [ ! -f "src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj" ]; then
+          echo "❌ No se encontró el proyecto API"
+          exit 1
+        fi
+        
+        echo "✅ Estructura del proyecto correcta"
+        
+    - name: Success
+      run: |
+        echo "🎉 Verificación completada exitosamente!"
+        echo "✅ El proyecto está listo para desplegar"
+        echo "📦 Archivos principales encontrados:"
+        echo "   - PresupuestoFamiliarMensual.sln"
+        echo "   - Dockerfile"
+        echo "   - railway.json"
+        echo "   - src/PresupuestoFamiliarMensual.API/" 

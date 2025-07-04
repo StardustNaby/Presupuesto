@@ -19,12 +19,30 @@ jobs:
         
     - name: Build and test
       run: |
-        dotnet restore
-        dotnet build --no-restore --configuration Release
-        dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish
+        dotnet restore --verbosity normal
+        dotnet build --no-restore --configuration Release --verbosity normal
+        dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish --no-build
+        
+    - name: Check Railway secrets
+      id: check-secrets
+      run: |
+        if [ -n "${{ secrets.RAILWAY_TOKEN }}" ] && [ -n "${{ secrets.RAILWAY_SERVICE }}" ]; then
+          echo "secrets_configured=true" >> $GITHUB_OUTPUT
+        else
+          echo "secrets_configured=false" >> $GITHUB_OUTPUT
+        fi
         
     - name: Deploy to Railway
+      if: steps.check-secrets.outputs.secrets_configured == 'true'
       uses: railway/deploy@v1
       with:
         service: ${{ secrets.RAILWAY_SERVICE }}
-        token: ${{ secrets.RAILWAY_TOKEN }} 
+        token: ${{ secrets.RAILWAY_TOKEN }}
+        
+    - name: Skip deployment
+      if: steps.check-secrets.outputs.secrets_configured == 'false'
+      run: |
+        echo "⚠️ Railway secrets no configurados. Saltando despliegue."
+        echo "Para configurar el despliegue automático:"
+        echo "1. Ve a Settings > Secrets and variables > Actions"
+        echo "2. Agrega RAILWAY_TOKEN y RAILWAY_SERVICE" 

@@ -20,13 +20,20 @@ jobs:
         dotnet-version: '8.0.x'
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --verbosity normal
       
     - name: Build
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build --no-restore --configuration Release --verbosity normal
       
     - name: Publish
-      run: dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish
+      run: dotnet publish src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensual.API.csproj -c Release -o ./publish --no-build
+      
+    - name: Verify published files
+      run: |
+        echo "Verificando archivos publicados..."
+        ls -la ./publish/
+        test -f "./publish/PresupuestoFamiliarMensual.API.dll" || exit 1
+        echo "✅ Archivos publicados correctamente"
       
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
