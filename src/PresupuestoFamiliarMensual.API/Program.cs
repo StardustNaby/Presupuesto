@@ -49,7 +49,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 if (!string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(connectionString));
+        options.UseNpgsql(connectionString, 
+            npgsqlOptions => npgsqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 3,
+                maxRetryDelay: TimeSpan.FromSeconds(5),
+                errorCodesToAdd: null)));
 }
 else
 {
@@ -88,13 +92,16 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// Habilitar Swagger en desarrollo y producción para facilitar las pruebas
-app.UseSwagger();
-app.UseSwaggerUI(c =>
+// Habilitar Swagger solo en desarrollo
+if (app.Environment.IsDevelopment())
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
-    c.RoutePrefix = "swagger";
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
+        c.RoutePrefix = "swagger";
+    });
+}
 
 // CORS debe ir antes que HTTPS redirection
 app.UseCors("AllowAll");
@@ -119,7 +126,6 @@ app.Use(async (context, next) =>
     catch (Exception ex)
     {
         Console.WriteLine($"❌ Error no manejado: {ex.Message}");
-        Console.WriteLine($"📍 Stack trace: {ex.StackTrace}");
         
         context.Response.StatusCode = 500;
         context.Response.ContentType = "application/json";
@@ -132,7 +138,7 @@ app.Use(async (context, next) =>
     }
 });
 
-// Seed data (solo en desarrollo o si la base de datos está disponible)
+// Seed data solo en desarrollo y si la base de datos está disponible
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
@@ -150,6 +156,7 @@ if (app.Environment.IsDevelopment())
     }
 }
 
+Console.WriteLine("✅ Aplicación iniciada correctamente");
 app.Run();
 
 // Método para sembrar datos iniciales

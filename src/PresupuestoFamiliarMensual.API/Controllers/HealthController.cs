@@ -27,18 +27,13 @@ public class HealthController : ControllerBase
             environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development",
             database = new {
                 hasConnectionString = hasConnectionString,
-                connectionStringLength = connectionString?.Length ?? 0,
-                dbHost = Environment.GetEnvironmentVariable("DB_HOST"),
-                dbPort = Environment.GetEnvironmentVariable("DB_PORT"),
-                dbName = Environment.GetEnvironmentVariable("DB_NAME"),
-                dbUser = Environment.GetEnvironmentVariable("DB_USER"),
-                hasDbPassword = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("DB_PASSWORD"))
+                connectionStringLength = connectionString?.Length ?? 0
             }
         });
     }
 
     /// <summary>
-    /// Health check simple para Railway
+    /// Health check simple para Railway - optimizado para velocidad
     /// </summary>
     /// <returns>Estado de la aplicación</returns>
     [HttpGet("simple")]

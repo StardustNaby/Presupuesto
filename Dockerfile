@@ -2,6 +2,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Usar la imagen de SDK para compilar
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -21,11 +23,11 @@ COPY . .
 
 # Compilar la aplicación
 WORKDIR "/src/src/PresupuestoFamiliarMensual.API"
-RUN dotnet build "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/build
+RUN dotnet build "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/build --no-restore
 
 # Publicar la aplicación
 FROM build AS publish
-RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish
+RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish --no-build --no-restore
 
 # Imagen final
 FROM base AS final
