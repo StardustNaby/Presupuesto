@@ -50,10 +50,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (!string.IsNullOrEmpty(dbUrl))
 {
-    // Si la cadena es formato URL, la convertimos a formato largo
-    if (dbUrl.StartsWith("postgres://"))
+    // Si la cadena es formato URL (postgres:// o postgresql://), la convertimos a formato largo
+    if (dbUrl.StartsWith("postgres://") || dbUrl.StartsWith("postgresql://"))
     {
-        var uri = new Uri(dbUrl);
+        var url = dbUrl.Replace("postgresql://", "postgres://");
+        var uri = new Uri(url);
         var userInfo = uri.UserInfo.Split(':');
         var builderStr = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
         connectionString = builderStr;
