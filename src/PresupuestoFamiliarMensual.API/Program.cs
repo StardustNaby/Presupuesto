@@ -20,21 +20,23 @@ var port = Environment.GetEnvironmentVariable("PORT");
 Console.WriteLine($"🚀 Puerto detectado: {port ?? "null"}");
 
 // Configurar el puerto para Railway
-if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
+int portNumber = 8080; // Puerto por defecto
+if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int parsedPort))
 {
+    portNumber = parsedPort;
     Console.WriteLine($"✅ Usando puerto: {portNumber}");
     builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
 }
 else
 {
-    Console.WriteLine($"⚠️ Usando puerto por defecto: 8080");
-    builder.WebHost.UseUrls("http://0.0.0.0:8080");
+    Console.WriteLine($"⚠️ Usando puerto por defecto: {portNumber}");
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
 }
 
 // Configuración adicional para Railway
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(portNumber > 0 ? portNumber : 8080);
+    serverOptions.ListenAnyIP(portNumber);
 });
 
 // Configurar variables de entorno para Railway
