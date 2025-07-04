@@ -39,14 +39,11 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 
-// Solo Swagger en desarrollo
-if (builder.Environment.IsDevelopment())
+// Swagger siempre habilitado (desarrollo y producción)
+builder.Services.AddSwaggerGen(c =>
 {
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new() { Title = "Presupuesto Familiar Mensual API", Version = "v1" });
-    });
-}
+    c.SwaggerDoc("v1", new() { Title = "Presupuesto Familiar Mensual API", Version = "v1" });
+});
 
 // Database - Configuración condicional para Railway
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -105,15 +102,12 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
-        c.RoutePrefix = "swagger";
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Presupuesto Familiar Mensual API v1");
+    c.RoutePrefix = "swagger";
+});
 
 app.UseCors("AllowAll");
 
