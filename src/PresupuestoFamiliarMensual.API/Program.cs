@@ -12,13 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configuración específica para Railway
 var port = Environment.GetEnvironmentVariable("PORT");
+Console.WriteLine($"🚀 Puerto detectado: {port ?? "null"}");
+
 if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
 {
+    Console.WriteLine($"✅ Usando puerto: {portNumber}");
     builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
 }
 else
 {
     // Puerto por defecto si no se puede parsear
+    Console.WriteLine($"⚠️ Usando puerto por defecto: 8080");
     builder.WebHost.UseUrls("http://0.0.0.0:8080");
 }
 
@@ -92,13 +96,41 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.UseHttpsRedirection();
-
+// CORS debe ir antes que HTTPS redirection
 app.UseCors("AllowAll");
+
+// Solo usar HTTPS redirection en producción
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Middleware de manejo de excepciones global
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Error no manejado: {ex.Message}");
+        Console.WriteLine($"📍 Stack trace: {ex.StackTrace}");
+        
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new
+        {
+            message = "Error interno del servidor",
+            error = ex.Message,
+            timestamp = DateTime.UtcNow
+        }));
+    }
+});
 
 // Seed data (solo en desarrollo o si la base de datos está disponible)
 if (app.Environment.IsDevelopment())
