@@ -34,16 +34,6 @@ public class HealthController : ControllerBase
     }
 
     /// <summary>
-    /// Health check ultra simple para Railway
-    /// </summary>
-    /// <returns>Estado de la aplicación</returns>
-    [HttpGet("railway")]
-    public ActionResult GetRailway()
-    {
-        return Ok("OK");
-    }
-
-    /// <summary>
     /// Health check más simple posible
     /// </summary>
     /// <returns>Estado de la aplicación</returns>
