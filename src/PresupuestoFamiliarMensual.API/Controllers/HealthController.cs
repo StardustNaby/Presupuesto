@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using PresupuestoFamiliarMensual.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace PresupuestoFamiliarMensual.API.Controllers;
 
@@ -9,6 +11,12 @@ namespace PresupuestoFamiliarMensual.API.Controllers;
 [Route("api/[controller]")]
 public class HealthController : ControllerBase
 {
+    private readonly ApplicationDbContext _context;
+
+    public HealthController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
     /// <summary>
     /// Health check básico para Railway
     /// </summary>
@@ -78,5 +86,42 @@ public class HealthController : ControllerBase
         };
 
         return Ok(diagnostic);
+    }
+
+    /// <summary>
+    /// Endpoint de diagnóstico detallado de la base de datos
+    /// </summary>
+    /// <returns>Información detallada de la base de datos</returns>
+    [HttpGet("database")]
+    public async Task<ActionResult> GetDatabaseDiagnostic()
+    {
+        try
+        {
+            var canConnect = await _context.Database.CanConnectAsync();
+            var pendingMigrations = await _context.Database.GetPendingMigrationsAsync();
+            var appliedMigrations = await _context.Database.GetAppliedMigrationsAsync();
+            
+            var diagnostic = new
+            {
+                timestamp = DateTime.UtcNow,
+                canConnect = canConnect,
+                pendingMigrations = pendingMigrations.ToArray(),
+                appliedMigrations = appliedMigrations.ToArray(),
+                pendingMigrationsCount = pendingMigrations.Count(),
+                appliedMigrationsCount = appliedMigrations.Count(),
+                connectionString = Environment.GetEnvironmentVariable("DATABASE_URL") != null ? "Configured" : "Not configured"
+            };
+
+            return Ok(diagnostic);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                timestamp = DateTime.UtcNow,
+                error = ex.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
     }
 } 
