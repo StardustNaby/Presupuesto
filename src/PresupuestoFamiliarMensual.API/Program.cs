@@ -91,6 +91,18 @@ if (!string.IsNullOrEmpty(dbUrl))
             Console.WriteLine("🔄 Aplicando migraciones...");
             await context.Database.MigrateAsync();
             Console.WriteLine("✅ Migraciones ejecutadas correctamente");
+            
+            // Verificar si hay datos y crear datos de ejemplo si está vacío
+            if (!await context.Budgets.AnyAsync())
+            {
+                Console.WriteLine("📊 Base de datos vacía, creando datos de ejemplo...");
+                await SeedDatabaseAsync(context);
+                Console.WriteLine("✅ Datos de ejemplo creados correctamente");
+            }
+            else
+            {
+                Console.WriteLine("📊 Base de datos ya contiene datos");
+            }
         }
         else
         {
@@ -115,4 +127,87 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 Console.WriteLine("✅ Aplicación lista");
-app.Run(); 
+app.Run();
+
+// Método para crear datos de ejemplo
+static async Task SeedDatabaseAsync(ApplicationDbContext context)
+{
+    try
+    {
+        // Crear miembros de familia
+        var familyMembers = new[]
+        {
+            new FamilyMember { Name = "Juan Pérez", Age = 35, Role = "Padre" },
+            new FamilyMember { Name = "María Pérez", Age = 32, Role = "Madre" },
+            new FamilyMember { Name = "Carlos Pérez", Age = 12, Role = "Hijo" },
+            new FamilyMember { Name = "Ana Pérez", Age = 8, Role = "Hija" }
+        };
+
+        context.FamilyMembers.AddRange(familyMembers);
+        await context.SaveChangesAsync();
+
+        // Crear meses
+        var months = new[]
+        {
+            new Month { Name = "Enero", Number = 1 },
+            new Month { Name = "Febrero", Number = 2 },
+            new Month { Name = "Marzo", Number = 3 },
+            new Month { Name = "Abril", Number = 4 },
+            new Month { Name = "Mayo", Number = 5 },
+            new Month { Name = "Junio", Number = 6 },
+            new Month { Name = "Julio", Number = 7 },
+            new Month { Name = "Agosto", Number = 8 },
+            new Month { Name = "Septiembre", Number = 9 },
+            new Month { Name = "Octubre", Number = 10 },
+            new Month { Name = "Noviembre", Number = 11 },
+            new Month { Name = "Diciembre", Number = 12 }
+        };
+
+        context.Months.AddRange(months);
+        await context.SaveChangesAsync();
+
+        // Crear presupuestos
+        var budgets = new[]
+        {
+            new Budget { FamilyMemberId = 1, MonthId = 7, Year = 2025, TotalAmount = 5000 },
+            new Budget { FamilyMemberId = 2, MonthId = 7, Year = 2025, TotalAmount = 3000 },
+            new Budget { FamilyMemberId = 1, MonthId = 8, Year = 2025, TotalAmount = 5500 }
+        };
+
+        context.Budgets.AddRange(budgets);
+        await context.SaveChangesAsync();
+
+        // Crear categorías
+        var categories = new[]
+        {
+            new BudgetCategory { Name = "Alimentación", Limit = 1500, BudgetId = 1 },
+            new BudgetCategory { Name = "Transporte", Limit = 800, BudgetId = 1 },
+            new BudgetCategory { Name = "Entretenimiento", Limit = 500, BudgetId = 1 },
+            new BudgetCategory { Name = "Servicios", Limit = 1200, BudgetId = 1 },
+            new BudgetCategory { Name = "Alimentación", Limit = 1000, BudgetId = 2 },
+            new BudgetCategory { Name = "Transporte", Limit = 600, BudgetId = 2 }
+        };
+
+        context.BudgetCategories.AddRange(categories);
+        await context.SaveChangesAsync();
+
+        // Crear gastos
+        var expenses = new[]
+        {
+            new Expense { Description = "Compras del supermercado", Amount = 250, CategoryId = 1, BudgetId = 1 },
+            new Expense { Description = "Gasolina", Amount = 150, CategoryId = 2, BudgetId = 1 },
+            new Expense { Description = "Cine", Amount = 80, CategoryId = 3, BudgetId = 1 },
+            new Expense { Description = "Luz", Amount = 200, CategoryId = 4, BudgetId = 1 },
+            new Expense { Description = "Comida rápida", Amount = 120, CategoryId = 5, BudgetId = 2 }
+        };
+
+        context.Expenses.AddRange(expenses);
+        await context.SaveChangesAsync();
+
+        Console.WriteLine($"✅ Datos creados: {familyMembers.Length} miembros, {budgets.Length} presupuestos, {categories.Length} categorías, {expenses.Length} gastos");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Error creando datos de ejemplo: {ex.Message}");
+    }
+} 
