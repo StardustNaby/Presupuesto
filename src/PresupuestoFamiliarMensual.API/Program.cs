@@ -3,6 +3,7 @@ using PresupuestoFamiliarMensual.Infrastructure.Data;
 using PresupuestoFamiliarMensual.Infrastructure.Repositories;
 using PresupuestoFamiliarMensual.Core.Interfaces;
 using PresupuestoFamiliarMensual.Application.Services;
+using PresupuestoFamiliarMensual.Core.Entities;
 using AutoMapper;
 using PresupuestoFamiliarMensual.Application.Mapping;
 
