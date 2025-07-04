@@ -139,80 +139,126 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
 {
     try
     {
-        // Crear miembros de familia
-        var familyMembers = new[]
+        Console.WriteLine("🔄 Creando 100 miembros de familia...");
+        var familyMembers = new List<FamilyMember>();
+        var nombres = new[] { "Juan", "María", "Carlos", "Ana", "Luis", "Carmen", "Pedro", "Isabel", "Miguel", "Rosa", "Jorge", "Patricia", "Fernando", "Lucía", "Roberto", "Elena", "Diego", "Sofia", "Alejandro", "Valeria" };
+        var apellidos = new[] { "Pérez", "García", "López", "Martínez", "González", "Rodríguez", "Fernández", "Moreno", "Jiménez", "Torres", "Ruiz", "Hernández", "Díaz", "Sánchez", "Romero", "Alonso", "Gutiérrez", "Navarro", "Morales", "Molina" };
+        
+        for (int i = 1; i <= 100; i++)
         {
-            new FamilyMember { Name = "Juan Pérez", Email = "juan@example.com" },
-            new FamilyMember { Name = "María Pérez", Email = "maria@example.com" },
-            new FamilyMember { Name = "Carlos Pérez", Email = "carlos@example.com" },
-            new FamilyMember { Name = "Ana Pérez", Email = "ana@example.com" }
-        };
+            var nombre = nombres[i % nombres.Length];
+            var apellido = apellidos[i % apellidos.Length];
+            familyMembers.Add(new FamilyMember 
+            { 
+                Name = $"{nombre} {apellido} {i}", 
+                Email = $"{nombre.ToLower()}.{apellido.ToLower()}{i}@example.com" 
+            });
+        }
 
         context.FamilyMembers.AddRange(familyMembers);
         await context.SaveChangesAsync();
+        Console.WriteLine($"✅ {familyMembers.Count} miembros de familia creados");
 
-        // Crear meses
-        var months = new[]
+        Console.WriteLine("🔄 Creando 100 meses (múltiples años)...");
+        var months = new List<Month>();
+        var nombresMeses = new[] { "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+        
+        for (int year = 2020; year <= 2027; year++)
         {
-            new Month { Year = 2024, MonthNumber = 1, Name = "Enero" },
-            new Month { Year = 2024, MonthNumber = 2, Name = "Febrero" },
-            new Month { Year = 2024, MonthNumber = 3, Name = "Marzo" },
-            new Month { Year = 2024, MonthNumber = 4, Name = "Abril" },
-            new Month { Year = 2024, MonthNumber = 5, Name = "Mayo" },
-            new Month { Year = 2024, MonthNumber = 6, Name = "Junio" },
-            new Month { Year = 2024, MonthNumber = 7, Name = "Julio" },
-            new Month { Year = 2024, MonthNumber = 8, Name = "Agosto" },
-            new Month { Year = 2024, MonthNumber = 9, Name = "Septiembre" },
-            new Month { Year = 2024, MonthNumber = 10, Name = "Octubre" },
-            new Month { Year = 2024, MonthNumber = 11, Name = "Noviembre" },
-            new Month { Year = 2024, MonthNumber = 12, Name = "Diciembre" }
-        };
+            for (int month = 1; month <= 12; month++)
+            {
+                months.Add(new Month 
+                { 
+                    Year = year, 
+                    MonthNumber = month, 
+                    Name = nombresMeses[month - 1] 
+                });
+                
+                if (months.Count >= 100) break;
+            }
+            if (months.Count >= 100) break;
+        }
 
         context.Months.AddRange(months);
         await context.SaveChangesAsync();
+        Console.WriteLine($"✅ {months.Count} meses creados");
 
-        // Crear presupuestos
-        var budgets = new[]
+        Console.WriteLine("🔄 Creando 100 presupuestos...");
+        var budgets = new List<Budget>();
+        var random = new Random(42); // Semilla fija para resultados consistentes
+        
+        for (int i = 1; i <= 100; i++)
         {
-            new Budget { FamilyMemberId = 1, MonthId = 7, TotalAmount = 5000 },
-            new Budget { FamilyMemberId = 2, MonthId = 7, TotalAmount = 3000 },
-            new Budget { FamilyMemberId = 1, MonthId = 8, TotalAmount = 5500 }
-        };
+            var familyMemberId = (i % familyMembers.Count) + 1;
+            var monthId = (i % months.Count) + 1;
+            var totalAmount = random.Next(2000, 10000); // Entre 2000 y 10000
+            
+            budgets.Add(new Budget 
+            { 
+                FamilyMemberId = familyMemberId, 
+                MonthId = monthId, 
+                TotalAmount = totalAmount 
+            });
+        }
 
         context.Budgets.AddRange(budgets);
         await context.SaveChangesAsync();
+        Console.WriteLine($"✅ {budgets.Count} presupuestos creados");
 
-        // Crear categorías
-        var categories = new[]
+        Console.WriteLine("🔄 Creando 100 categorías de presupuesto...");
+        var categories = new List<BudgetCategory>();
+        var nombresCategorias = new[] { "Alimentación", "Transporte", "Entretenimiento", "Servicios", "Salud", "Educación", "Vestimenta", "Hogar", "Tecnología", "Deportes", "Viajes", "Regalos", "Mascotas", "Jardín", "Arte", "Música", "Libros", "Cine", "Restaurantes", "Café" };
+        
+        for (int i = 1; i <= 100; i++)
         {
-            new BudgetCategory { Name = "Alimentación", Limit = 1500, BudgetId = 1 },
-            new BudgetCategory { Name = "Transporte", Limit = 800, BudgetId = 1 },
-            new BudgetCategory { Name = "Entretenimiento", Limit = 500, BudgetId = 1 },
-            new BudgetCategory { Name = "Servicios", Limit = 1200, BudgetId = 1 },
-            new BudgetCategory { Name = "Alimentación", Limit = 1000, BudgetId = 2 },
-            new BudgetCategory { Name = "Transporte", Limit = 600, BudgetId = 2 }
-        };
+            var budgetId = (i % budgets.Count) + 1;
+            var nombreCategoria = nombresCategorias[i % nombresCategorias.Length];
+            var limit = random.Next(500, 3000); // Entre 500 y 3000
+            
+            categories.Add(new BudgetCategory 
+            { 
+                Name = $"{nombreCategoria} {i}", 
+                Limit = limit, 
+                BudgetId = budgetId 
+            });
+        }
 
         context.BudgetCategories.AddRange(categories);
         await context.SaveChangesAsync();
+        Console.WriteLine($"✅ {categories.Count} categorías creadas");
 
-        // Crear gastos
-        var expenses = new[]
+        Console.WriteLine("🔄 Creando 100 gastos...");
+        var expenses = new List<Expense>();
+        var descripciones = new[] { "Compras del supermercado", "Gasolina", "Cine", "Luz", "Comida rápida", "Medicamentos", "Libros", "Ropa", "Mantenimiento", "Internet", "Agua", "Gas", "Seguro", "Gimnasio", "Peluquería", "Dentista", "Óptica", "Farmacia", "Limpieza", "Reparaciones" };
+        
+        for (int i = 1; i <= 100; i++)
         {
-            new Expense { Description = "Compras del supermercado", Amount = 250, BudgetCategoryId = 1, FamilyMemberId = 1, MonthId = 7 },
-            new Expense { Description = "Gasolina", Amount = 150, BudgetCategoryId = 2, FamilyMemberId = 1, MonthId = 7 },
-            new Expense { Description = "Cine", Amount = 80, BudgetCategoryId = 3, FamilyMemberId = 1, MonthId = 7 },
-            new Expense { Description = "Luz", Amount = 200, BudgetCategoryId = 4, FamilyMemberId = 1, MonthId = 7 },
-            new Expense { Description = "Comida rápida", Amount = 120, BudgetCategoryId = 5, FamilyMemberId = 2, MonthId = 7 }
-        };
+            var categoryId = (i % categories.Count) + 1;
+            var familyMemberId = (i % familyMembers.Count) + 1;
+            var monthId = (i % months.Count) + 1;
+            var descripcion = descripciones[i % descripciones.Length];
+            var amount = random.Next(50, 1000); // Entre 50 y 1000
+            
+            expenses.Add(new Expense 
+            { 
+                Description = $"{descripcion} {i}", 
+                Amount = amount, 
+                BudgetCategoryId = categoryId, 
+                FamilyMemberId = familyMemberId, 
+                MonthId = monthId 
+            });
+        }
 
         context.Expenses.AddRange(expenses);
         await context.SaveChangesAsync();
+        Console.WriteLine($"✅ {expenses.Count} gastos creados");
 
-        Console.WriteLine($"✅ Datos creados: {familyMembers.Length} miembros, {budgets.Length} presupuestos, {categories.Length} categorías, {expenses.Length} gastos");
+        Console.WriteLine($"🎉 ¡Datos de ejemplo creados exitosamente!");
+        Console.WriteLine($"📊 Resumen: {familyMembers.Count} miembros, {months.Count} meses, {budgets.Count} presupuestos, {categories.Count} categorías, {expenses.Count} gastos");
     }
     catch (Exception ex)
     {
         Console.WriteLine($"⚠️ Error creando datos de ejemplo: {ex.Message}");
+        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
     }
 } 
