@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     
     steps:
     - name: Checkout code
@@ -19,20 +20,19 @@ jobs:
       with:
         dotnet-version: '8.0.x'
         
-    - name: List files
-      run: |
-        echo "📁 Contenido del directorio:"
-        ls -la
-        echo "📁 Contenido de src/:"
-        ls -la src/
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
         
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore --verbosity minimal
       
     - name: Build
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release --no-restore --verbosity minimal
       
     - name: Success
-      run: |
-        echo "✅ Build completado exitosamente"
-        echo "🎉 Pipeline funcionando correctamente" 
+      run: echo "✅ Build completado exitosamente" 

@@ -7,6 +7,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     
     steps:
     - name: Checkout code
@@ -17,13 +18,18 @@ jobs:
       with:
         dotnet-version: '8.0.x'
         
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+        
     - name: Build
       run: |
-        dotnet restore
-        dotnet build --configuration Release
+        dotnet restore --verbosity minimal
+        dotnet build --configuration Release --no-restore --verbosity minimal
         
     - name: Success
-      run: |
-        echo "✅ Build completado exitosamente"
-        echo "🚀 Listo para desplegar manualmente en Railway"
-        echo "📋 Para desplegar automáticamente, configura Railway CLI" 
+      run: echo "✅ Build completado - Listo para Railway" 

@@ -1,0 +1,24 @@
+name: Quick Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Quick verification
+      run: |
+        echo "⚡ Verificación rápida..."
+        test -f "PresupuestoFamiliarMensual.sln" && echo "✅ Solución encontrada"
+        test -f "Dockerfile" && echo "✅ Dockerfile encontrado"
+        test -f "railway.json" && echo "✅ Railway config encontrado"
+        echo "🎉 Verificación completada en segundos" 
