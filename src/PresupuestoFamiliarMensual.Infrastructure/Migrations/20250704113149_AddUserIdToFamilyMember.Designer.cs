@@ -11,7 +11,7 @@ using PresupuestoFamiliarMensual.Infrastructure.Data;
 namespace PresupuestoFamiliarMensual.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250704112313_AddUserIdToFamilyMember")]
+    [Migration("20250704113149_AddUserIdToFamilyMember")]
     partial class AddUserIdToFamilyMember
     {
         /// <inheritdoc />
