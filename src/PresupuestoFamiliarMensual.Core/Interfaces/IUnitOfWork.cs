@@ -12,6 +12,7 @@ public interface IUnitOfWork : IDisposable
     IExpenseRepository Expenses { get; }
     IRepository<FamilyMember> FamilyMembers { get; }
     IRepository<Month> Months { get; }
+    IUserRepository Users { get; }
     
     Task<int> SaveChangesAsync();
     Task BeginTransactionAsync();

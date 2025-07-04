@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using PresupuestoFamiliarMensual.Application.DTOs;
 using PresupuestoFamiliarMensual.Application.Services;
 using PresupuestoFamiliarMensual.Core.Exceptions;
@@ -10,6 +11,7 @@ namespace PresupuestoFamiliarMensual.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/budgets/{budgetId}/expenses")]
+[Authorize]
 public class ExpensesController : ControllerBase
 {
     private readonly IExpenseService _expenseService;
@@ -31,6 +33,45 @@ public class ExpensesController : ControllerBase
         {
             var expenses = await _expenseService.GetByBudgetIdAsync(budgetId);
             return Ok(expenses);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene gastos de un presupuesto con paginación, ordenamiento y búsqueda
+    /// </summary>
+    /// <param name="budgetId">ID del presupuesto</param>
+    /// <param name="pageNumber">Número de página (comienza en 1)</param>
+    /// <param name="pageSize">Tamaño de la página (máximo 50)</param>
+    /// <param name="sortBy">Campo por el cual ordenar (amount, date, createdat, description, familymember, category)</param>
+    /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
+    /// <param name="searchTerm">Término de búsqueda</param>
+    /// <returns>Gastos paginados</returns>
+    [HttpGet("paginated")]
+    public async Task<ActionResult<PaginatedResponse<ExpenseDto>>> GetByBudgetIdPaginated(
+        int budgetId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                SearchTerm = searchTerm
+            };
+
+            var result = await _expenseService.GetByBudgetIdPaginatedAsync(budgetId, parameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {

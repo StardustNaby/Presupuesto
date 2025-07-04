@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using PresupuestoFamiliarMensual.Application.DTOs;
 using PresupuestoFamiliarMensual.Application.Services;
 using PresupuestoFamiliarMensual.Core.Exceptions;
@@ -10,6 +11,7 @@ namespace PresupuestoFamiliarMensual.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/categories")]
+[Authorize]
 public class BudgetCategoriesController : ControllerBase
 {
     private readonly IBudgetCategoryService _categoryService;
@@ -38,6 +40,43 @@ public class BudgetCategoriesController : ControllerBase
     }
 
     /// <summary>
+    /// Obtiene categorías con paginación, ordenamiento y búsqueda
+    /// </summary>
+    /// <param name="pageNumber">Número de página (comienza en 1)</param>
+    /// <param name="pageSize">Tamaño de la página (máximo 50)</param>
+    /// <param name="sortBy">Campo por el cual ordenar (name, limit, createdat)</param>
+    /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
+    /// <param name="searchTerm">Término de búsqueda</param>
+    /// <returns>Categorías paginadas</returns>
+    [HttpGet("paginated")]
+    public async Task<ActionResult<PaginatedResponse<BudgetCategoryDto>>> GetPaginated(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                SearchTerm = searchTerm
+            };
+
+            var result = await _categoryService.GetPaginatedAsync(parameters);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Obtiene todas las categorías de un presupuesto
     /// </summary>
     /// <param name="budgetId">ID del presupuesto</param>
@@ -49,6 +88,45 @@ public class BudgetCategoriesController : ControllerBase
         {
             var categories = await _categoryService.GetByBudgetIdAsync(budgetId);
             return Ok(categories);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene categorías de un presupuesto con paginación
+    /// </summary>
+    /// <param name="budgetId">ID del presupuesto</param>
+    /// <param name="pageNumber">Número de página (comienza en 1)</param>
+    /// <param name="pageSize">Tamaño de la página (máximo 50)</param>
+    /// <param name="sortBy">Campo por el cual ordenar (name, limit, createdat)</param>
+    /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
+    /// <param name="searchTerm">Término de búsqueda</param>
+    /// <returns>Categorías del presupuesto paginadas</returns>
+    [HttpGet("budget/{budgetId}/paginated")]
+    public async Task<ActionResult<PaginatedResponse<BudgetCategoryDto>>> GetByBudgetIdPaginated(
+        int budgetId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                SearchTerm = searchTerm
+            };
+
+            var result = await _categoryService.GetByBudgetIdPaginatedAsync(budgetId, parameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {

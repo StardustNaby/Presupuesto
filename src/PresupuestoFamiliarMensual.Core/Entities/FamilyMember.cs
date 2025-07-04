@@ -15,5 +15,7 @@ public class FamilyMember
     public DateTime? UpdatedAt { get; set; }
     
     // Relaciones
+    public int? UserId { get; set; }
+    public virtual User? User { get; set; }
     public virtual ICollection<Expense> Expenses { get; set; } = new List<Expense>();
 } 

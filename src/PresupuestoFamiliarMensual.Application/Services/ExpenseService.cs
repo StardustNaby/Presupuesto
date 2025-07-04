@@ -26,6 +26,83 @@ public class ExpenseService : IExpenseService
         return _mapper.Map<IEnumerable<ExpenseDto>>(expenses);
     }
 
+    public async Task<PaginatedResponse<ExpenseDto>> GetByBudgetIdPaginatedAsync(int budgetId, PaginationParameters parameters)
+    {
+        var query = await _unitOfWork.Expenses.GetByBudgetIdAsync(budgetId);
+        var expenses = query.ToList();
+
+        // Aplicar búsqueda si se especifica
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            expenses = expenses.Where(e => 
+                e.Description?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true ||
+                e.FamilyMember?.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true ||
+                e.BudgetCategory?.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        // Aplicar ordenamiento
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            expenses = parameters.SortBy.ToLower() switch
+            {
+                "amount" => parameters.SortDirection?.ToLower() == "desc" 
+                    ? expenses.OrderByDescending(e => e.Amount).ToList()
+                    : expenses.OrderBy(e => e.Amount).ToList(),
+                "date" => parameters.SortDirection?.ToLower() == "desc"
+                    ? expenses.OrderByDescending(e => e.Date).ToList()
+                    : expenses.OrderBy(e => e.Date).ToList(),
+                "createdat" => parameters.SortDirection?.ToLower() == "desc"
+                    ? expenses.OrderByDescending(e => e.CreatedAt).ToList()
+                    : expenses.OrderBy(e => e.CreatedAt).ToList(),
+                "description" => parameters.SortDirection?.ToLower() == "desc"
+                    ? expenses.OrderByDescending(e => e.Description).ToList()
+                    : expenses.OrderBy(e => e.Description).ToList(),
+                "familymember" => parameters.SortDirection?.ToLower() == "desc"
+                    ? expenses.OrderByDescending(e => e.FamilyMember?.Name).ToList()
+                    : expenses.OrderBy(e => e.FamilyMember?.Name).ToList(),
+                "category" => parameters.SortDirection?.ToLower() == "desc"
+                    ? expenses.OrderByDescending(e => e.BudgetCategory?.Name).ToList()
+                    : expenses.OrderBy(e => e.BudgetCategory?.Name).ToList(),
+                _ => expenses.OrderBy(e => e.Date).ToList()
+            };
+        }
+        else
+        {
+            expenses = expenses.OrderBy(e => e.Date).ToList();
+        }
+
+        var totalCount = expenses.Count;
+        var totalPages = (int)Math.Ceiling((double)totalCount / parameters.PageSize);
+        var currentPage = parameters.PageNumber;
+        var pageSize = parameters.PageSize;
+
+        var pagedData = expenses
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var expenseDtos = _mapper.Map<IEnumerable<ExpenseDto>>(pagedData);
+
+        return new PaginatedResponse<ExpenseDto>
+        {
+            Data = expenseDtos,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            CurrentPage = currentPage,
+            PageSize = pageSize,
+            Pagination = new PaginationInfo
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                HasPreviousPage = currentPage > 1,
+                HasNextPage = currentPage < totalPages
+            }
+        };
+    }
+
     public async Task<ExpenseDto?> GetByIdAsync(int id)
     {
         var expense = await _unitOfWork.Expenses.GetByIdWithDetailsAsync(id);

@@ -26,10 +26,142 @@ public class BudgetCategoryService : IBudgetCategoryService
         return _mapper.Map<IEnumerable<BudgetCategoryDto>>(categories);
     }
 
+    public async Task<PaginatedResponse<BudgetCategoryDto>> GetPaginatedAsync(PaginationParameters parameters)
+    {
+        var query = await _unitOfWork.BudgetCategories.GetAllAsync();
+        var categories = query.ToList();
+
+        // Aplicar búsqueda si se especifica
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            categories = categories.Where(c => 
+                c.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        // Aplicar ordenamiento
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            categories = parameters.SortBy.ToLower() switch
+            {
+                "name" => parameters.SortDirection?.ToLower() == "desc" 
+                    ? categories.OrderByDescending(c => c.Name).ToList()
+                    : categories.OrderBy(c => c.Name).ToList(),
+                "limit" => parameters.SortDirection?.ToLower() == "desc"
+                    ? categories.OrderByDescending(c => c.Limit).ToList()
+                    : categories.OrderBy(c => c.Limit).ToList(),
+                "createdat" => parameters.SortDirection?.ToLower() == "desc"
+                    ? categories.OrderByDescending(c => c.CreatedAt).ToList()
+                    : categories.OrderBy(c => c.CreatedAt).ToList(),
+                _ => categories.OrderBy(c => c.Name).ToList()
+            };
+        }
+        else
+        {
+            categories = categories.OrderBy(c => c.Name).ToList();
+        }
+
+        var totalCount = categories.Count;
+        var totalPages = (int)Math.Ceiling((double)totalCount / parameters.PageSize);
+        var currentPage = parameters.PageNumber;
+        var pageSize = parameters.PageSize;
+
+        var pagedData = categories
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var categoryDtos = _mapper.Map<IEnumerable<BudgetCategoryDto>>(pagedData);
+
+        return new PaginatedResponse<BudgetCategoryDto>
+        {
+            Data = categoryDtos,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            CurrentPage = currentPage,
+            PageSize = pageSize,
+            Pagination = new PaginationInfo
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                HasPreviousPage = currentPage > 1,
+                HasNextPage = currentPage < totalPages
+            }
+        };
+    }
+
     public async Task<IEnumerable<BudgetCategoryDto>> GetByBudgetIdAsync(int budgetId)
     {
         var categories = await _unitOfWork.BudgetCategories.GetByBudgetIdAsync(budgetId);
         return _mapper.Map<IEnumerable<BudgetCategoryDto>>(categories);
+    }
+
+    public async Task<PaginatedResponse<BudgetCategoryDto>> GetByBudgetIdPaginatedAsync(int budgetId, PaginationParameters parameters)
+    {
+        var query = await _unitOfWork.BudgetCategories.GetByBudgetIdAsync(budgetId);
+        var categories = query.ToList();
+
+        // Aplicar búsqueda si se especifica
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            categories = categories.Where(c => 
+                c.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        // Aplicar ordenamiento
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            categories = parameters.SortBy.ToLower() switch
+            {
+                "name" => parameters.SortDirection?.ToLower() == "desc" 
+                    ? categories.OrderByDescending(c => c.Name).ToList()
+                    : categories.OrderBy(c => c.Name).ToList(),
+                "limit" => parameters.SortDirection?.ToLower() == "desc"
+                    ? categories.OrderByDescending(c => c.Limit).ToList()
+                    : categories.OrderBy(c => c.Limit).ToList(),
+                "createdat" => parameters.SortDirection?.ToLower() == "desc"
+                    ? categories.OrderByDescending(c => c.CreatedAt).ToList()
+                    : categories.OrderBy(c => c.CreatedAt).ToList(),
+                _ => categories.OrderBy(c => c.Name).ToList()
+            };
+        }
+        else
+        {
+            categories = categories.OrderBy(c => c.Name).ToList();
+        }
+
+        var totalCount = categories.Count;
+        var totalPages = (int)Math.Ceiling((double)totalCount / parameters.PageSize);
+        var currentPage = parameters.PageNumber;
+        var pageSize = parameters.PageSize;
+
+        var pagedData = categories
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var categoryDtos = _mapper.Map<IEnumerable<BudgetCategoryDto>>(pagedData);
+
+        return new PaginatedResponse<BudgetCategoryDto>
+        {
+            Data = categoryDtos,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            CurrentPage = currentPage,
+            PageSize = pageSize,
+            Pagination = new PaginationInfo
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                HasPreviousPage = currentPage > 1,
+                HasNextPage = currentPage < totalPages
+            }
+        };
     }
 
     public async Task<BudgetCategoryDto?> GetByIdAsync(int id)

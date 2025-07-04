@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using PresupuestoFamiliarMensual.Application.DTOs;
 using PresupuestoFamiliarMensual.Application.Services;
 using PresupuestoFamiliarMensual.Core.Exceptions;
@@ -10,6 +11,7 @@ namespace PresupuestoFamiliarMensual.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class BudgetsController : ControllerBase
 {
     private readonly IBudgetService _budgetService;
@@ -30,6 +32,43 @@ public class BudgetsController : ControllerBase
         {
             var budgets = await _budgetService.GetAllAsync();
             return Ok(budgets);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene presupuestos con paginación, ordenamiento y búsqueda
+    /// </summary>
+    /// <param name="pageNumber">Número de página (comienza en 1)</param>
+    /// <param name="pageSize">Tamaño de la página (máximo 50)</param>
+    /// <param name="sortBy">Campo por el cual ordenar (totalamount, createdat, familymember, month)</param>
+    /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
+    /// <param name="searchTerm">Término de búsqueda</param>
+    /// <returns>Presupuestos paginados</returns>
+    [HttpGet("paginated")]
+    public async Task<ActionResult<PaginatedResponse<BudgetDto>>> GetPaginated(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                SearchTerm = searchTerm
+            };
+
+            var result = await _budgetService.GetPaginatedAsync(parameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -71,6 +110,45 @@ public class BudgetsController : ControllerBase
         {
             var budgets = await _budgetService.GetByFamilyMemberAsync(familyMemberId);
             return Ok(budgets);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Obtiene presupuestos por miembro de la familia con paginación
+    /// </summary>
+    /// <param name="familyMemberId">ID del miembro de la familia</param>
+    /// <param name="pageNumber">Número de página (comienza en 1)</param>
+    /// <param name="pageSize">Tamaño de la página (máximo 50)</param>
+    /// <param name="sortBy">Campo por el cual ordenar (totalamount, createdat, month)</param>
+    /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
+    /// <param name="searchTerm">Término de búsqueda</param>
+    /// <returns>Presupuestos del miembro paginados</returns>
+    [HttpGet("family-member/{familyMemberId}/paginated")]
+    public async Task<ActionResult<PaginatedResponse<BudgetDto>>> GetByFamilyMemberPaginated(
+        int familyMemberId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] string? sortDirection = "asc",
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var parameters = new PaginationParameters
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SortBy = sortBy,
+                SortDirection = sortDirection,
+                SearchTerm = searchTerm
+            };
+
+            var result = await _budgetService.GetByFamilyMemberPaginatedAsync(familyMemberId, parameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {

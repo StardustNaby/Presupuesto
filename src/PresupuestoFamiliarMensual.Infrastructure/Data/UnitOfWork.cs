@@ -21,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
         Expenses = new ExpenseRepository(context);
         FamilyMembers = new Repository<FamilyMember>(context);
         Months = new Repository<Month>(context);
+        Users = new UserRepository(context);
     }
 
     public IBudgetRepository Budgets { get; }
@@ -28,6 +29,7 @@ public class UnitOfWork : IUnitOfWork
     public IExpenseRepository Expenses { get; }
     public IRepository<FamilyMember> FamilyMembers { get; }
     public IRepository<Month> Months { get; }
+    public IUserRepository Users { get; }
 
     public async Task<int> SaveChangesAsync()
     {

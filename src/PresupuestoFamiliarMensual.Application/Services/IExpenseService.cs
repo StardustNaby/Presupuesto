@@ -8,6 +8,7 @@ namespace PresupuestoFamiliarMensual.Application.Services;
 public interface IExpenseService
 {
     Task<IEnumerable<ExpenseDto>> GetByBudgetIdAsync(int budgetId);
+    Task<PaginatedResponse<ExpenseDto>> GetByBudgetIdPaginatedAsync(int budgetId, PaginationParameters parameters);
     Task<ExpenseDto?> GetByIdAsync(int id);
     Task<ExpenseDto> CreateAsync(int budgetId, CreateExpenseDto createExpenseDto);
     Task DeleteAsync(int id);

@@ -25,6 +25,76 @@ public class BudgetService : IBudgetService
         return _mapper.Map<IEnumerable<BudgetDto>>(budgets);
     }
 
+    public async Task<PaginatedResponse<BudgetDto>> GetPaginatedAsync(PaginationParameters parameters)
+    {
+        var query = await _unitOfWork.Budgets.GetAllWithDetailsAsync();
+        var budgets = query.ToList();
+
+        // Aplicar búsqueda si se especifica
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            budgets = budgets.Where(b => 
+                b.FamilyMember?.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true ||
+                b.Month?.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        // Aplicar ordenamiento
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            budgets = parameters.SortBy.ToLower() switch
+            {
+                "totalamount" => parameters.SortDirection?.ToLower() == "desc" 
+                    ? budgets.OrderByDescending(b => b.TotalAmount).ToList()
+                    : budgets.OrderBy(b => b.TotalAmount).ToList(),
+                "createdat" => parameters.SortDirection?.ToLower() == "desc"
+                    ? budgets.OrderByDescending(b => b.CreatedAt).ToList()
+                    : budgets.OrderBy(b => b.CreatedAt).ToList(),
+                "familymember" => parameters.SortDirection?.ToLower() == "desc"
+                    ? budgets.OrderByDescending(b => b.FamilyMember?.Name).ToList()
+                    : budgets.OrderBy(b => b.FamilyMember?.Name).ToList(),
+                "month" => parameters.SortDirection?.ToLower() == "desc"
+                    ? budgets.OrderByDescending(b => b.Month?.Name).ToList()
+                    : budgets.OrderBy(b => b.Month?.Name).ToList(),
+                _ => budgets.OrderBy(b => b.CreatedAt).ToList()
+            };
+        }
+        else
+        {
+            budgets = budgets.OrderBy(b => b.CreatedAt).ToList();
+        }
+
+        var totalCount = budgets.Count;
+        var totalPages = (int)Math.Ceiling((double)totalCount / parameters.PageSize);
+        var currentPage = parameters.PageNumber;
+        var pageSize = parameters.PageSize;
+
+        var pagedData = budgets
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var budgetDtos = _mapper.Map<IEnumerable<BudgetDto>>(pagedData);
+
+        return new PaginatedResponse<BudgetDto>
+        {
+            Data = budgetDtos,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            CurrentPage = currentPage,
+            PageSize = pageSize,
+            Pagination = new PaginationInfo
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                HasPreviousPage = currentPage > 1,
+                HasNextPage = currentPage < totalPages
+            }
+        };
+    }
+
     public async Task<BudgetDto?> GetByIdAsync(int id)
     {
         var budget = await _unitOfWork.Budgets.GetByIdWithDetailsAsync(id);
@@ -35,6 +105,72 @@ public class BudgetService : IBudgetService
     {
         var budgets = await _unitOfWork.Budgets.GetByFamilyMemberAsync(familyMemberId);
         return _mapper.Map<IEnumerable<BudgetDto>>(budgets);
+    }
+
+    public async Task<PaginatedResponse<BudgetDto>> GetByFamilyMemberPaginatedAsync(int familyMemberId, PaginationParameters parameters)
+    {
+        var query = await _unitOfWork.Budgets.GetByFamilyMemberAsync(familyMemberId);
+        var budgets = query.ToList();
+
+        // Aplicar búsqueda si se especifica
+        if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
+        {
+            budgets = budgets.Where(b => 
+                b.Month?.Name?.Contains(parameters.SearchTerm, StringComparison.OrdinalIgnoreCase) == true
+            ).ToList();
+        }
+
+        // Aplicar ordenamiento
+        if (!string.IsNullOrWhiteSpace(parameters.SortBy))
+        {
+            budgets = parameters.SortBy.ToLower() switch
+            {
+                "totalamount" => parameters.SortDirection?.ToLower() == "desc" 
+                    ? budgets.OrderByDescending(b => b.TotalAmount).ToList()
+                    : budgets.OrderBy(b => b.TotalAmount).ToList(),
+                "createdat" => parameters.SortDirection?.ToLower() == "desc"
+                    ? budgets.OrderByDescending(b => b.CreatedAt).ToList()
+                    : budgets.OrderBy(b => b.CreatedAt).ToList(),
+                "month" => parameters.SortDirection?.ToLower() == "desc"
+                    ? budgets.OrderByDescending(b => b.Month?.Name).ToList()
+                    : budgets.OrderBy(b => b.Month?.Name).ToList(),
+                _ => budgets.OrderBy(b => b.CreatedAt).ToList()
+            };
+        }
+        else
+        {
+            budgets = budgets.OrderBy(b => b.CreatedAt).ToList();
+        }
+
+        var totalCount = budgets.Count;
+        var totalPages = (int)Math.Ceiling((double)totalCount / parameters.PageSize);
+        var currentPage = parameters.PageNumber;
+        var pageSize = parameters.PageSize;
+
+        var pagedData = budgets
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var budgetDtos = _mapper.Map<IEnumerable<BudgetDto>>(pagedData);
+
+        return new PaginatedResponse<BudgetDto>
+        {
+            Data = budgetDtos,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            CurrentPage = currentPage,
+            PageSize = pageSize,
+            Pagination = new PaginationInfo
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = currentPage,
+                PageSize = pageSize,
+                HasPreviousPage = currentPage > 1,
+                HasNextPage = currentPage < totalPages
+            }
+        };
     }
 
     public async Task<BudgetDto> CreateAsync(CreateBudgetDto createBudgetDto)

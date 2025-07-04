@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Budget> Budgets { get; set; }
     public DbSet<BudgetCategory> BudgetCategories { get; set; }
     public DbSet<Expense> Expenses { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,6 +113,33 @@ public class ApplicationDbContext : DbContext
                 .WithMany(f => f.Expenses)
                 .HasForeignKey(e => e.FamilyMemberId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Configuración de User
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.IsActive).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+            entity.Property(e => e.UpdatedAt);
+            entity.Property(e => e.LastLoginAt);
+            
+            entity.HasIndex(e => e.Username).IsUnique();
+            entity.HasIndex(e => e.Email).IsUnique();
+        });
+
+        // Configuración de FamilyMember para incluir relación con User
+        modelBuilder.Entity<FamilyMember>(entity =>
+        {
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.FamilyMembers)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 } 
