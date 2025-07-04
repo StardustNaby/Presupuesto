@@ -11,8 +11,16 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración específica para Railway
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
+}
+else
+{
+    // Puerto por defecto si no se puede parsear
+    builder.WebHost.UseUrls("http://0.0.0.0:8080");
+}
 
 // Configurar variables de entorno para Railway
 builder.Configuration.AddEnvironmentVariables();
