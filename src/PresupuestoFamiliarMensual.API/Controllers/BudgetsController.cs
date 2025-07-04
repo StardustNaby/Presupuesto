@@ -22,10 +22,16 @@ public class BudgetsController : ControllerBase
     }
 
     /// <summary>
-    /// Obtiene todos los presupuestos
+    /// Obtiene todos los presupuestos del usuario autenticado
     /// </summary>
-    /// <returns>Lista de presupuestos</returns>
+    /// <returns>Lista completa de presupuestos</returns>
+    /// <response code="200">Lista de presupuestos obtenida exitosamente</response>
+    /// <response code="401">No autorizado - Token JWT requerido</response>
+    /// <response code="500">Error interno del servidor</response>
     [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<BudgetDto>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(typeof(object), 500)]
     public async Task<ActionResult<IEnumerable<BudgetDto>>> GetAll()
     {
         try
@@ -47,8 +53,14 @@ public class BudgetsController : ControllerBase
     /// <param name="sortBy">Campo por el cual ordenar (totalamount, createdat, familymember, month)</param>
     /// <param name="sortDirection">Dirección del ordenamiento (asc/desc)</param>
     /// <param name="searchTerm">Término de búsqueda</param>
-    /// <returns>Presupuestos paginados</returns>
+    /// <returns>Presupuestos paginados con metadatos</returns>
+    /// <response code="200">Presupuestos paginados obtenidos exitosamente</response>
+    /// <response code="401">No autorizado - Token JWT requerido</response>
+    /// <response code="500">Error interno del servidor</response>
     [HttpGet("paginated")]
+    [ProducesResponseType(typeof(PaginatedResponse<BudgetDto>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(typeof(object), 500)]
     public async Task<ActionResult<PaginatedResponse<BudgetDto>>> GetPaginated(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,

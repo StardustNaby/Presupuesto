@@ -21,11 +21,17 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Registra un nuevo usuario
+    /// Registra un nuevo usuario en el sistema
     /// </summary>
-    /// <param name="registerDto">Datos de registro</param>
-    /// <returns>Respuesta de autenticación</returns>
+    /// <param name="registerDto">Datos de registro del usuario</param>
+    /// <returns>Respuesta de autenticación con token JWT</returns>
+    /// <response code="200">Usuario registrado exitosamente</response>
+    /// <response code="400">Datos de entrada inválidos o usuario ya existe</response>
+    /// <response code="500">Error interno del servidor</response>
     [HttpPost("register")]
+    [ProducesResponseType(typeof(AuthResponseDto), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 500)]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterRequestDto registerDto)
     {
         try
@@ -47,11 +53,17 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Autentica un usuario
+    /// Autentica un usuario existente
     /// </summary>
-    /// <param name="loginDto">Datos de login</param>
-    /// <returns>Respuesta de autenticación</returns>
+    /// <param name="loginDto">Credenciales de acceso</param>
+    /// <returns>Respuesta de autenticación con token JWT</returns>
+    /// <response code="200">Autenticación exitosa</response>
+    /// <response code="400">Credenciales inválidas</response>
+    /// <response code="500">Error interno del servidor</response>
     [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthResponseDto), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 500)]
     public async Task<ActionResult<AuthResponseDto>> Login(LoginRequestDto loginDto)
     {
         try
