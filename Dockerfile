@@ -1,5 +1,5 @@
 # Usar la imagen oficial de .NET 8.0
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_ENVIRONMENT=Production
@@ -7,7 +7,7 @@ ENV DOTNET_EnableDiagnostics=0
 ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
 # Usar la imagen de SDK para compilar
-FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copiar archivos de proyecto
@@ -31,8 +31,8 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Crear usuario no-root
-RUN adduser -D -s /bin/sh appuser && chown -R appuser /app
+# Crear usuario no-root (solo si es necesario)
+RUN groupadd -r appuser && useradd -r -g appuser appuser && chown -R appuser /app
 USER appuser
 
 ENTRYPOINT ["dotnet", "PresupuestoFamiliarMensual.API.dll"] 
