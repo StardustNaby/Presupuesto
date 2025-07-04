@@ -16,19 +16,10 @@ public class HealthController : ControllerBase
     [HttpGet]
     public ActionResult Get()
     {
-        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-        var hasConnectionString = !string.IsNullOrEmpty(connectionString);
-        
         return Ok(new { 
             status = "healthy", 
             timestamp = DateTime.UtcNow,
-            service = "Presupuesto Familiar Mensual API",
-            version = "1.0.0",
-            environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development",
-            database = new {
-                hasConnectionString = hasConnectionString,
-                connectionStringLength = connectionString?.Length ?? 0
-            }
+            service = "Presupuesto Familiar Mensual API"
         });
     }
 
@@ -40,5 +31,11 @@ public class HealthController : ControllerBase
     public ActionResult GetSimple()
     {
         return Ok("OK");
+    }
+
+    [HttpGet("ping")]
+    public ActionResult Ping()
+    {
+        return Ok("pong");
     }
 } 

@@ -8,6 +8,11 @@
     <PublishTrimmed>true</PublishTrimmed>
     <PublishSingleFile>false</PublishSingleFile>
     <SelfContained>false</SelfContained>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

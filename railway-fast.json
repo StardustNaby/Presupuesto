@@ -6,11 +6,11 @@
   },
   "deploy": {
     "startCommand": "dotnet PresupuestoFamiliarMensual.API.dll",
-    "healthcheckPath": "/api/health/simple",
-    "healthcheckTimeout": 30,
+    "healthcheckPath": "/api/health/ping",
+    "healthcheckTimeout": 15,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 2,
+    "restartPolicyMaxRetries": 1,
     "numReplicas": 1,
-    "healthcheckInterval": 10
+    "healthcheckInterval": 5
   }
 } 

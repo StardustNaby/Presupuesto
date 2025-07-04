@@ -1,12 +1,13 @@
 # Usar la imagen oficial de .NET 8.0
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS base
 WORKDIR /app
 EXPOSE 8080
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_EnableDiagnostics=0
 
 # Usar la imagen de SDK para compilar
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 WORKDIR /src
 
 # Copiar archivos de proyecto
@@ -21,21 +22,17 @@ RUN dotnet restore "src/PresupuestoFamiliarMensual.API/PresupuestoFamiliarMensua
 # Copiar todo el código fuente
 COPY . .
 
-# Compilar la aplicación
+# Compilar y publicar en un solo paso
 WORKDIR "/src/src/PresupuestoFamiliarMensual.API"
-RUN dotnet build "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/build --no-restore
-
-# Publicar la aplicación
-FROM build AS publish
-RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish --no-build --no-restore
+RUN dotnet publish "PresupuestoFamiliarMensual.API.csproj" -c Release -o /app/publish --no-restore --no-build
 
 # Imagen final
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 
 # Crear usuario no-root
-RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+RUN adduser -D -s /bin/sh appuser && chown -R appuser /app
 USER appuser
 
 ENTRYPOINT ["dotnet", "PresupuestoFamiliarMensual.API.dll"] 
