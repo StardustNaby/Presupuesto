@@ -17,37 +17,47 @@ builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Configuración de base de datos
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"🔍 DATABASE_URL configurado: {!string.IsNullOrEmpty(dbUrl)}");
 if (!string.IsNullOrEmpty(dbUrl))
 {
+    Console.WriteLine($"🔗 DATABASE_URL: {dbUrl.Substring(0, Math.Min(50, dbUrl.Length))}...");
     Console.WriteLine("🔗 Configurando base de datos PostgreSQL...");
     
-    // Convertir formato URL a formato de conexión
-    if (dbUrl.StartsWith("postgres://") || dbUrl.StartsWith("postgresql://"))
+    try
     {
-        var url = dbUrl.Replace("postgresql://", "postgres://");
-        var uri = new Uri(url);
-        var userInfo = uri.UserInfo.Split(':');
-        var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-        
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(connectionString));
-        
-        Console.WriteLine("✅ Base de datos PostgreSQL configurada");
+        // Convertir formato URL a formato de conexión
+        if (dbUrl.StartsWith("postgres://") || dbUrl.StartsWith("postgresql://"))
+        {
+            var url = dbUrl.Replace("postgresql://", "postgres://");
+            var uri = new Uri(url);
+            var userInfo = uri.UserInfo.Split(':');
+            var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
+            
+            Console.WriteLine($"🔗 Host: {uri.Host}, Puerto: {uri.Port}, Base: {uri.AbsolutePath.TrimStart('/')}");
+            
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString));
+            
+            Console.WriteLine("✅ Base de datos PostgreSQL configurada");
+        }
+        else
+        {
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(dbUrl));
+            Console.WriteLine("✅ Base de datos configurada con cadena directa");
+        }
     }
-    else
+    catch (Exception ex)
     {
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(dbUrl));
-        Console.WriteLine("✅ Base de datos configurada con cadena directa");
+        Console.WriteLine($"❌ Error configurando PostgreSQL: {ex.Message}");
+        Console.WriteLine("🔄 Fallback a SQLite...");
+        ConfigureSqlite(builder);
     }
 }
 else
 {
-    Console.WriteLine("🔗 Configurando base de datos SQLite local...");
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(connectionString));
-    Console.WriteLine("✅ Base de datos SQLite configurada");
+    Console.WriteLine("⚠️ No hay DATABASE_URL configurado");
+    ConfigureSqlite(builder);
 }
 
 // AutoMapper
@@ -77,52 +87,47 @@ var app = builder.Build();
 
 Console.WriteLine("🚀 Aplicación iniciada");
 
-// Ejecutar migraciones si hay base de datos
-if (!string.IsNullOrEmpty(dbUrl))
+// Ejecutar migraciones
+try
 {
-    try
+    Console.WriteLine("🔄 Ejecutando migraciones...");
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    // Verificar conexión
+    Console.WriteLine("🔍 Verificando conexión a la base de datos...");
+    var canConnect = await context.Database.CanConnectAsync();
+    Console.WriteLine($"📊 ¿Puede conectar a la BD? {canConnect}");
+    
+    if (canConnect)
     {
-        Console.WriteLine("🔄 Ejecutando migraciones...");
-        using var scope = app.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        Console.WriteLine("🔄 Aplicando migraciones...");
+        await context.Database.MigrateAsync();
+        Console.WriteLine("✅ Migraciones ejecutadas correctamente");
         
-        // Verificar conexión
-        Console.WriteLine("🔍 Verificando conexión a la base de datos...");
-        var canConnect = await context.Database.CanConnectAsync();
-        Console.WriteLine($"📊 ¿Puede conectar a la BD? {canConnect}");
-        
-        if (canConnect)
+        // Verificar si hay datos y crear datos de ejemplo si está vacío
+        if (!await context.Budgets.AnyAsync())
         {
-            Console.WriteLine("🔄 Aplicando migraciones...");
-            await context.Database.MigrateAsync();
-            Console.WriteLine("✅ Migraciones ejecutadas correctamente");
-            
-            // Verificar si hay datos y crear datos de ejemplo si está vacío
-            if (!await context.Budgets.AnyAsync())
-            {
-                Console.WriteLine("📊 Base de datos vacía, creando datos de ejemplo...");
-                await SeedDatabaseAsync(context);
-                Console.WriteLine("✅ Datos de ejemplo creados correctamente");
-            }
-            else
-            {
-                Console.WriteLine("📊 Base de datos ya contiene datos");
-            }
+            Console.WriteLine("📊 Base de datos vacía, creando datos de ejemplo...");
+            await SeedDatabaseAsync(context);
+            Console.WriteLine("✅ Datos de ejemplo creados correctamente");
         }
         else
         {
-            Console.WriteLine("❌ No se puede conectar a la base de datos");
+            Console.WriteLine("📊 Base de datos ya contiene datos");
         }
     }
-    catch (Exception ex)
+    else
     {
-        Console.WriteLine($"⚠️ Error en migraciones: {ex.Message}");
-        Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
+        Console.WriteLine("❌ No se puede conectar a la base de datos");
+        Console.WriteLine("⚠️ La aplicación continuará sin base de datos");
     }
 }
-else
+catch (Exception ex)
 {
-    Console.WriteLine("⚠️ No hay DATABASE_URL configurado");
+    Console.WriteLine($"⚠️ Error en migraciones: {ex.Message}");
+    Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
+    Console.WriteLine("⚠️ La aplicación continuará sin base de datos");
 }
 
 // Pipeline mínimo
@@ -261,4 +266,14 @@ static async Task SeedDatabaseAsync(ApplicationDbContext context)
         Console.WriteLine($"⚠️ Error creando datos de ejemplo: {ex.Message}");
         Console.WriteLine($"📋 Stack trace: {ex.StackTrace}");
     }
+}
+
+// Método auxiliar para configurar SQLite
+static void ConfigureSqlite(WebApplicationBuilder builder)
+{
+    Console.WriteLine("🔗 Configurando base de datos SQLite local...");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db";
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(connectionString));
+    Console.WriteLine("✅ Base de datos SQLite configurada");
 } 
