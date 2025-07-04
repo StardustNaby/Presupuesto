@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using PresupuestoFamiliarMensual.Infrastructure.Data;
+using PresupuestoFamiliarMensual.Infrastructure.Repositories;
+using PresupuestoFamiliarMensual.Core.Interfaces;
+using PresupuestoFamiliarMensual.Application.Services;
+using AutoMapper;
+using PresupuestoFamiliarMensual.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +44,23 @@ else
 {
     Console.WriteLine("⚠️ DATABASE_URL no encontrado - modo sin base de datos");
 }
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Repositories
+builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
+builder.Services.AddScoped<IBudgetCategoryRepository, BudgetCategoryRepository>();
+builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Unit of Work
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Services
+builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IBudgetCategoryService, BudgetCategoryService>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 // Servicios mínimos
 builder.Services.AddControllers();
