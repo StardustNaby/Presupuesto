@@ -31,9 +31,15 @@ if (!string.IsNullOrEmpty(dbUrl))
             var url = dbUrl.Replace("postgresql://", "postgres://");
             var uri = new Uri(url);
             var userInfo = uri.UserInfo.Split(':');
-            var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
             
-            Console.WriteLine($"🔗 Host: {uri.Host}, Puerto: {uri.Port}, Base: {uri.AbsolutePath.TrimStart('/')}");
+            // Detectar si es conexión local para usar SSL deshabilitado
+            var isLocalConnection = uri.Host == "localhost" || uri.Host == "127.0.0.1";
+            var sslMode = isLocalConnection ? "Disable" : "Require";
+            var trustServerCert = isLocalConnection ? "" : ";Trust Server Certificate=true";
+            
+            var connectionString = $"Host={uri.Host};Port={uri.Port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode={sslMode}{trustServerCert}";
+            
+            Console.WriteLine($"🔗 Host: {uri.Host}, Puerto: {uri.Port}, Base: {uri.AbsolutePath.TrimStart('/')}, SSL: {sslMode}");
             
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));

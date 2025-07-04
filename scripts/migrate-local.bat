@@ -1,7 +1,7 @@
 @echo off
 echo Ejecutando migraciones en PostgreSQL local...
 
-set DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/presupuesto_familiar
+set DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/presupuesto_familiar?sslmode=disable
 echo Usando base de datos: %DATABASE_URL%
 
 cd src\PresupuestoFamiliarMensual.API
