@@ -12,14 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configuración específica para Railway
 var port = Environment.GetEnvironmentVariable("PORT");
-Console.WriteLine($"🚀 Puerto: {port ?? "8080"}");
+Console.WriteLine($"🚀 Puerto detectado: {port ?? "null"}");
 
+// Configurar el puerto para Railway
 if (!string.IsNullOrEmpty(port) && int.TryParse(port, out int portNumber))
 {
+    Console.WriteLine($"✅ Usando puerto: {portNumber}");
     builder.WebHost.UseUrls($"http://0.0.0.0:{portNumber}");
 }
 else
 {
+    Console.WriteLine($"⚠️ Usando puerto por defecto: 8080");
     builder.WebHost.UseUrls("http://0.0.0.0:8080");
 }
 
@@ -127,5 +130,5 @@ app.Use(async (context, next) =>
     }
 });
 
-Console.WriteLine("✅ Aplicación iniciada");
+Console.WriteLine("✅ Aplicación iniciada correctamente");
 app.Run(); 
