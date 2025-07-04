@@ -50,6 +50,16 @@ if (builder.Environment.IsDevelopment())
 
 // Database - Configuración condicional para Railway
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+if (!string.IsNullOrEmpty(dbUrl))
+{
+    connectionString = dbUrl;
+    Console.WriteLine($"🔗 Usando cadena de conexión de DATABASE_URL");
+}
+else
+{
+    Console.WriteLine($"🔗 Usando cadena de conexión de appsettings.json");
+}
 if (!string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
